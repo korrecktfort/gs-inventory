@@ -8,7 +8,7 @@ $items = get_posts([
 ?>
 
 <?php 
-require_once get_template_directory() . '/template-parts/inc/loans/loan-queries.php'; 
+require_once get_template_directory() . '/inc/loans/loan-queries.php'; 
 $loanedQuantities = gs_get_loaned_quantities_map();
 ?>
 
