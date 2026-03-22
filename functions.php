@@ -1,6 +1,11 @@
 <?php
 // register custom post type for "item" 
 
+function enqueue_style(){
+    wp_enqueue_style('gs-inventory-style', get_template_directory_uri() . '/style.css');
+}
+add_action('wp_enqueue_scripts', 'enqueue_style');
+
 function register_item_post_type() {
     $labels = [
         'name' => 'Items',

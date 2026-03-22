@@ -3,3 +3,59 @@ Theme Name: GS Inventory
 Version: 1.0
 Description: A minimal theme for inventory management
 */
+
+
+.row {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.column{
+    flex: 1;
+    padding: 10px;    
+}
+
+.item-name{
+    border: 1px solid #000000;    
+}
+
+.item-availability{
+    border: 1px solid #000000;    
+    text-align: right;
+}
+
+.item-quantity{
+    border: 1px solid #000000;    
+    text-align: right;
+}
+
+.item-row {
+    display: flex;
+    flex-direction: row;    
+    gap: 10px;
+    align-items: flex-start;
+    border: 1px solid #000000;    
+    align-items: center;
+}
+
+.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.loan-summary-row{
+    display: flex;
+    flex-direction: row;    
+    gap: 10px;
+    align-items: flex-start;
+}
+
+loan-summary-name{
+    flex: 1;   
+}
+
+.loan-summary-quantity{
+    width: 50px;    
+    text-align: right;
+}
