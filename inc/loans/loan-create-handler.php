@@ -111,6 +111,9 @@ if (!function_exists('gs_handle_create_loan')) {
             update_field('quantity', $quantity, $loan_item_id);
         }
 
+        wp_redirect( get_permalink($loan_id));
+        exit;
+
         return [
             'success' => true,
             'loan_id' => $loan_id,

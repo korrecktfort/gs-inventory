@@ -12,6 +12,17 @@ require_once get_template_directory() . '/inc/loans/loan-queries.php';
 $loanedQuantities = gs_get_loaned_quantities_map();
 ?>
 
+<section>
+    <?php get_template_part('template-parts/ui/filter-input', null, [
+    'filter_id' => 'item-filter',
+    'placeholder' => 'Search items...',
+    'target' => '#loan-item-list',
+    'item_selector' => '.item-row',
+    'text_selector' => '.item-info-trigger',
+]); ?>
+</section>
+
+<section class="item-list" id="loan-item-list">
 <?php foreach ($items as $item) : ?>
     
     <?php 
@@ -21,22 +32,24 @@ $loanedQuantities = gs_get_loaned_quantities_map();
         $stock_total = (int) get_field('stock_total', $id); 
         $loaned = $loanedQuantities[$id] ?? 0;
         $available = max(0, $stock_total - $loaned);
-        $class_disabled = ($available <= 0) ? 'disabled' : '';
-        
+        $class_disabled = ($available <= 0) ? 'disabled' : '';        
     ?> 
 
-<section class="item-list">
 <div class="item-row <?php echo esc_attr($class_disabled); ?>" data-available="<?php echo esc_attr($available); ?>">
+    
+    <!-- Display Name -->
     <div class="item-name column"> 
-        <?php echo esc_html($name); ?>
+        <?php get_template_part( 'template-parts/items/item-info', 'trigger', ['item_id' => $id] ); ?>
     </div>
 
+    <!-- Display Availability -->
     <div class="item-availability column">        
         <?php echo esc_html($available); ?>
         <?php echo "/"; ?>
         <?php echo esc_html($stock_total); ?>     
     </div>
 
+    <!-- Assign Quantity To Loan -->
     <div class="item-quantity column">
         <button type="button" class="qty-btn qty-reset">--</button>
         <button type="button" class="qty-btn qty-minus">-</button>
@@ -48,10 +61,10 @@ $loanedQuantities = gs_get_loaned_quantities_map();
         max="<?php echo esc_attr($available); ?>"
         value="0"        
         >
-
         <button type="button" class="qty-btn qty-plus">+</button>
         <button type="button" class="qty-btn qty-max">++</button>
     </div>
+
 </div>
 <?php endforeach; ?>
 </section>
@@ -62,9 +75,14 @@ $loanedQuantities = gs_get_loaned_quantities_map();
         <!-- Dynamically populated list of selected items will go here -->
     </div>
 </section>
+
+<?php get_template_part('template-parts/items/item-info', 'modal'); ?>
+
+<?php get_footer()?>
         
 <script>
-    document.addEventListener('click', function (event) {
+    
+document.addEventListener('click', function (event) {
     const button = event.target.closest('.qty-btn');
 
     if (!button) {
