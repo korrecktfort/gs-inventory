@@ -80,27 +80,3 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-
-<style>
-    .filter-input {
-    position: relative;
-    max-width: 400px;
-}
-
-.filter-input-field {
-    width: 100%;
-    padding-right: 36px;
-    box-sizing: border-box;
-}
-
-.filter-input-clear {
-    position: absolute;
-    top: 50%;
-    right: 8px;
-    transform: translateY(-50%);
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-    line-height: 1;
-}
-</style>

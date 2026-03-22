@@ -1,4 +1,4 @@
-<div id="item-modal" class="item-modal" hidden>
+<div id="item-modal-trigger" class="item-modal-trigger item-modal-style" hidden>
     <div class="item-modal-backdrop"></div>
 
     <div class="item-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="item-modal-title">
@@ -24,3 +24,42 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    document.addEventListener('click', function (event) {
+    const openButton = event.target.closest('.open-item-modal');
+    const closeButton = event.target.closest('.item-modal-close');
+    const backdrop = event.target.closest('.item-modal-backdrop');
+    const modal = document.getElementById('item-modal-trigger');
+
+    if (!modal) {
+        return;
+    }
+
+    if (openButton) {
+        document.getElementById('item-modal-name').textContent = openButton.dataset.itemName || '';
+        document.getElementById('item-modal-stock').textContent = openButton.dataset.itemStock || '';
+        document.getElementById('item-modal-notes').textContent = openButton.dataset.itemNotes || '';
+
+        modal.hidden = false;
+        return;
+    }
+
+    if (closeButton || backdrop) {
+        modal.hidden = true;
+    }
+});
+
+document.addEventListener('keydown', function (event) {
+    const modal = document.getElementById('item-modal-trigger');
+
+    if (!modal || modal.hidden) {
+        return;
+    }
+
+    if (event.key === 'Escape') {
+        modal.hidden = true;
+    }
+});
+</script>

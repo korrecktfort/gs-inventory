@@ -4,58 +4,115 @@ Version: 1.0
 Description: A minimal theme for inventory management
 */
 
+:root {
+    --color-bg: #fff;        /* dunkles violett */
+    --color-surface: #2a1b3d;   /* panel */
+    --color-border: #f59e0b;    /* orange */
+    --color-border-50: rgba(245, 158, 11, 0.5); /* orange mit 50% Transparenz */
+    --color-border-dark: #b45309;
+    --color-border-dark-50: rgba(180, 83, 9, 0.5);
+    --color-text: #000;      /* helles violett/weiß */
+    --color-accent: #fde047;    /* gelb */  
+    --font: 'VT323', monospace;
+}
 
-.row {
+body {
+    background-color: var(--color-background);    
+    font-family: var(--font);
+    color: var(--color-text);
+}
+
+p{
+    font-size: 16px;
+    line-height: 1.2px;
+}
+
+h1 {
+    text-transform: uppercase;
+    color: var(--color-accent); /* yellow */
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+h2 {
+    text-transform: uppercase;    
+    color: var(--color-text);
+    font-size: 22px;
+    margin-bottom: 6px;
+}
+
+h3 {
+    text-transform: uppercase;
+    color: #d8b4fe; /* slightly tinted violet */
+    font-size: 20px;
+}
+
+.border, .item-modal-dialog, .item-row
+{    
+    color: var(--color-text);
+    border: 2px solid var(--color-border); 
+    border-radius: 4px;
+    padding: 2px;
+}
+
+.item-row, .loan-meta{
     display: flex;
-    flex-direction: row;
-    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
 }
 
-.column{
-    flex: 1;
-    padding: 10px;    
+.qty-btn, .qty-input, .open-item-modal, .item-modal-close, .filter-input-field, .filter-input-clear, .date-field, .text-field, .btn-submit
+{
+    color: var(--color-text);
+    font-family: var(--font);
+    border: 2px solid var(--color-border);    
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 3px;
 }
 
-.item-name{
-    border: 1px solid #000000;    
+.item-modal-close{
+    position: relative;    
+    background-color: transparent;
 }
 
-.item-availability{
-    border: 1px solid #000000;    
-    text-align: right;
+.qty-btn:hover, .open-item-modal:hover, .item-modal-close:hover, .filter-input-field:hover, .filter-input-clear:hover, .date-field:hover, .text-field:hover, .btn-submit:hover
+{
+    background-color: var(--color-border-dark-50);
+    color: var(--color-bg);
 }
 
-.item-quantity{
-    border: 1px solid #000000;    
-    text-align: right;
-}
-
-.item-row {
-    display: flex;
-    flex-direction: row;    
-    gap: 10px;
-    align-items: flex-start;
-    border: 1px solid #000000;    
+.item-modal-style{  
+    background-color: var(--color-bg); 
+    position: fixed;
+    top: 50%;
+    left: 10%;
+    width: 300px;     
+    justify-content: center;
     align-items: center;
 }
 
-.disabled {
-    opacity: 0.5;
-    pointer-events: none;
+.filter-input{
+    display: flex;    
+    margin-bottom: 8px;
+    flex-grow: 1;
+    width: 100%;
 }
 
-.loan-summary-row{
-    display: flex;
-    flex-direction: row;    
-    gap: 10px;
-    align-items: flex-start;
+.filter-input-field {
+    width: 100%;
+    padding-right: 36px;
+    box-sizing: border-box;
 }
 
-loan-summary-name{
-    flex: 1;   
-}
-
-.loan-summary-quantity{
-    width: 50px;    
-    text-align: right;
+.filter-input-clear {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    line-height: 1;
 }

@@ -44,9 +44,7 @@ $loanedQuantities = gs_get_loaned_quantities_map();
 
     <!-- Display Availability -->
     <div class="item-availability column">        
-        <?php echo esc_html($available); ?>
-        <?php echo "/"; ?>
-        <?php echo esc_html($stock_total); ?>     
+        <p><?php echo esc_html($available) . "/" . esc_html($stock_total); ?></p>
     </div>
 
     <!-- Assign Quantity To Loan -->
@@ -77,11 +75,8 @@ $loanedQuantities = gs_get_loaned_quantities_map();
 </section>
 
 <?php get_template_part('template-parts/items/item-info', 'modal'); ?>
-
-<?php get_footer()?>
         
-<script>
-    
+<script>    
 document.addEventListener('click', function (event) {
     const button = event.target.closest('.qty-btn');
 

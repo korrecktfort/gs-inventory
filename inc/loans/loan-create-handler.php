@@ -27,6 +27,9 @@ if (!function_exists('gs_handle_create_loan')) {
 
         $loan_title  = sanitize_text_field($_POST['loan_title'] ?? '');
         $loan_status = sanitize_text_field($_POST['loan_status'] ?? 'active');
+        $loan_start_date = sanitize_text_field($_POST['start_date'] ?? '');
+        $loan_due_date = sanitize_text_field($_POST['due_date'] ?? '');
+
         $loan_items  = $_POST['loan_items'] ?? [];
 
         if ($loan_title === '') {
@@ -91,6 +94,8 @@ if (!function_exists('gs_handle_create_loan')) {
         }
 
         update_field('status', $loan_status, $loan_id);
+        update_field('start_date', $loan_start_date, $loan_id);
+        update_field('due_date', $loan_due_date, $loan_id);
 
         foreach ($validated_items as $validated_item) {
             $item_id  = $validated_item['item_id'];
