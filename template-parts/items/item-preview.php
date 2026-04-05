@@ -26,6 +26,8 @@ $condition_name = '';
 $tag_names = [];
 $image_url = '';
 $image_alt = '';
+$image_srcset = '';
+$image_sizes = '(max-width: 768px) 100vw, 24rem';
 
 if ($item_id && $show_image) {
     $image_field = get_field('image', $item_id);
@@ -50,10 +52,12 @@ if ($item_id && $show_image) {
     }
 
     if ($image_id > 0) {
-        $image_src = wp_get_attachment_image_src($image_id, 'large');
-        if (is_array($image_src) && !empty($image_src[0])) {
-            $image_url = (string) $image_src[0];
+        $image_url = (string) wp_get_attachment_image_url($image_id, 'gs-item-detail');
+        if ($image_url === '') {
+            $image_url = (string) wp_get_attachment_image_url($image_id, 'large');
         }
+
+        $image_srcset = (string) wp_get_attachment_image_srcset($image_id, 'gs-item-detail');
 
         if ($image_alt === '') {
             $image_alt_meta = get_post_meta($image_id, '_wp_attachment_image_alt', true);
@@ -128,9 +132,8 @@ $render_image_row = $show_image && ($show_data_table || $has_image || $is_modal)
         <?php if ($show_title) : ?>
             <<?php echo esc_attr($title_tag); ?> class="item-preview-title"<?php echo ($mode === 'modal') ? ' id="item-modal-name"' : ''; ?>>
                 <?php if ($title_url !== '') : ?>
-                    <a href="<?php echo esc_url($title_url); ?>">
+                    <a class="gs-arrow-link" href="<?php echo esc_url($title_url); ?>">
                         <?php echo esc_html($item_name); ?>
-                        <span class="item-preview-title-cue" aria-hidden="true">&rarr;</span>
                     </a>
                 <?php else : ?>
                     <?php echo esc_html($item_name); ?>
@@ -210,6 +213,8 @@ $render_image_row = $show_image && ($show_data_table || $has_image || $is_modal)
                             <?php echo $is_modal ? 'id="item-modal-image"' : ''; ?>
                             src="<?php echo esc_url($image_url); ?>"
                             alt="<?php echo esc_attr($image_alt); ?>"
+                            <?php echo ($image_srcset !== '') ? 'srcset="' . esc_attr($image_srcset) . '"' : ''; ?>
+                            sizes="<?php echo esc_attr($image_sizes); ?>"
                             loading="lazy"
                             decoding="async"
                             <?php echo (!$has_image) ? 'hidden' : ''; ?>

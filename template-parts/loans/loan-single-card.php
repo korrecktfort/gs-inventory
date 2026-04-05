@@ -25,9 +25,20 @@ $loan_items = get_posts([
 ]);
 
 $loaner = get_field('related_loaner', $loan_id);
+$loaner_id = is_object($loaner) ? (int) ($loaner->ID ?? 0) : (int) $loaner;
+$loaner_url = $loaner_id > 0 ? get_permalink($loaner_id) : '';
 $start_date = get_field('start_date', $loan_id);
 $due_date = get_field('due_date', $loan_id);
 $status = get_field('status', $loan_id);
+$loan_user_id = (int) get_field('user', $loan_id);
+
+if ($loan_user_id <= 0) {
+    $loan_user_id = (int) get_post_field('post_author', $loan_id);
+}
+
+$loan_user = $loan_user_id > 0 ? get_userdata($loan_user_id) : false;
+$loan_user_name = $loan_user ? (string) $loan_user->display_name : '';
+$loan_user_email = ($loan_user && !empty($loan_user->user_email)) ? (string) $loan_user->user_email : '';
 $status_label = (string) ($status ?: 'unknown');
 $status_key = sanitize_html_class(strtolower($status_label));
 
@@ -77,9 +88,8 @@ $article_class = trim('loan-single-card ' . $root_class);
     <div class="loan-single-head">
         <<?php echo esc_attr($title_tag); ?> class="loan-single-title">
             <?php if ($title_url !== '') : ?>
-            <a href="<?php echo esc_url($title_url); ?>">
-                <span><?php echo esc_html(get_the_title($loan_id)); ?></span>
-                <span class="loan-single-title-cue" aria-hidden="true">&rarr;</span>
+            <a class="gs-arrow-link" href="<?php echo esc_url($title_url); ?>">
+                <?php echo esc_html(get_the_title($loan_id)); ?>
             </a>
             <?php else : ?>
             <?php echo esc_html(get_the_title($loan_id)); ?>
@@ -94,7 +104,23 @@ $article_class = trim('loan-single-card ' . $root_class);
     <?php if ($loaner) : ?>
     <div class="loan-single-meta-item">
         <span class="ui-label">Loaner</span>
-        <span><?php echo esc_html(get_the_title($loaner)); ?></span>
+        <?php if (!empty($loaner_url)) : ?>
+            <a href="<?php echo esc_url($loaner_url); ?>"><?php echo esc_html(get_the_title($loaner_id)); ?></a>
+        <?php else : ?>
+            <span><?php echo esc_html(get_the_title($loaner)); ?></span>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($loan_user_name !== '') : ?>
+    <div class="loan-single-meta-item">
+        <span class="ui-label">Created By</span>
+        <span>
+            <?php echo esc_html($loan_user_name); ?>
+            <?php if ($loan_user_email !== '') : ?>
+                <?php echo esc_html(' (' . $loan_user_email . ')'); ?>
+            <?php endif; ?>
+        </span>
     </div>
     <?php endif; ?>
 
@@ -131,8 +157,9 @@ $article_class = trim('loan-single-card ' . $root_class);
             <ul class="loan-single-item-list">
             <?php foreach ($loan_items as $loan_item) : ?>
                 <?php
-                $item_id = get_field('related_item', $loan_item->ID);
-                $quantity = get_field('quantity', $loan_item->ID);
+                $item_id = (int) get_field('related_item', $loan_item->ID);
+                $quantity = (int) get_field('quantity', $loan_item->ID);
+                $stock_total = (int) get_field('stock_total', $item_id);
                 ?>
                 <?php if (!$item_id) { continue; } ?>
                 <li class="loan-single-item-row">
@@ -140,7 +167,7 @@ $article_class = trim('loan-single-card ' . $root_class);
                         <?php get_template_part('template-parts/items/item-info', 'trigger', ['item_id' => $item_id]); ?>
                     </div>
                     <div class="loan-single-item-quantity">
-                        <span class="loan-summary-quantity"><?php echo esc_html((string) $quantity); ?></span>
+                        <span class="loan-summary-quantity"><?php echo esc_html($quantity . '/' . $stock_total); ?></span>
                     </div>
                 </li>
             <?php endforeach; ?>

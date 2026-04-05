@@ -329,22 +329,18 @@ h3 {
     text-underline-offset: 0.12em;
 }
 
-.item-overview-row .item-preview-title-cue {
+.gs-arrow-link::after {
+    content: '\2192';
     display: inline;
-    margin-left: 0.08em;
+    margin-left: 0;
     text-decoration: inherit;
+    line-height: 1;
+    speak: never;
 }
 
 .item-overview-row .item-preview-title a:hover,
 .item-overview-row .item-preview-title a:focus-visible {
     color: var(--color-accent);
-}
-
-.item-preview-title-cue,
-.loan-single-title-cue {
-    display: inline-block;
-    margin-left: 0.2rem;
-    line-height: 1;
 }
 
 .item-preview-stock {
@@ -375,7 +371,7 @@ h3 {
 .item-preview-data-row {
     display: grid;
     grid-template-columns: 5rem 1fr;
-    align-items: center;
+    align-items: baseline;
     gap: 0.5rem;
 }
 
@@ -421,7 +417,6 @@ h3 {
     height: 100%;
     object-fit: contain;
     background: var(--color-surface);
-    transition: transform 0.16s ease-out;
     transform-origin: var(--item-image-origin-x, 50%) var(--item-image-origin-y, 50%);
 }
 
@@ -434,6 +429,7 @@ h3 {
 }
 
 .item-preview-image-wrap.is-zoom-active .item-preview-image {
+    transition: transform 0.12s ease-out;
     transform: scale(var(--item-image-zoom-scale, 1));
 }
 
@@ -1196,6 +1192,9 @@ input.ui-input[required]:valid,
     padding: 0.45rem 0.45rem 0;
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-border-50);
+    overflow: visible;
+    display: grid;
+    gap: 0.45rem;
 }
 
 .loan-list-toolbar .filter-input {
@@ -1203,6 +1202,8 @@ input.ui-input[required]:valid,
 }
 
 .loan-list-scroll {
+    max-height: 34rem;
+    overflow-y: auto;
     padding: 0.35rem;
 }
 
@@ -1247,17 +1248,214 @@ input.ui-input[required]:valid,
     overflow: hidden;
 }
 
+.loaner-overview-list {
+    max-width: 640px;
+    background: var(--color-bg);
+}
+
+.loaner-overview-panel {
+    border: 1px solid var(--color-border-50);
+    border-radius: 6px;
+    background: var(--color-surface);
+    overflow: hidden;
+}
+
+.loaner-overview-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding: 0.45rem 0.45rem 0;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border-50);
+}
+
+.loaner-overview-toolbar .filter-input {
+    margin-bottom: 0.45rem;
+}
+
+.loaner-overview-scroll {
+    padding: 0.35rem;
+}
+
+.loaner-overview-empty {
+    margin: 0;
+    opacity: 0.85;
+    padding: 0.55rem;
+}
+
+.loaner-overview-rows {
+    display: grid;
+    gap: 0;
+}
+
+.loaner-overview-row {
+    margin: 0;
+    padding: 0.28rem 0.4rem;
+    background: color-mix(in srgb, var(--color-surface) 88%, #fff 12%);
+}
+
+.loaner-overview-row + .loaner-overview-row {
+    margin-top: 0.25rem;
+    border-top: 1px solid var(--color-border-50);
+    padding-top: 0.25rem;
+}
+
+.loaner-overview-card,
+.loaner-single-card {
+    border: 1px solid var(--color-border-50);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--color-surface) 88%, #fff 12%);
+    padding: 0.65rem 0.75rem;
+}
+
+.loaner-overview-card {
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+}
+
+.loaner-overview-title,
+.loaner-single-title {
+    margin: 0;
+    font-weight: 700;
+}
+
+.loaner-overview-title {
+    font-size: 1.15rem;
+}
+
+.loaner-overview-title a {
+    display: inline;
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+    font-weight: 700;
+}
+
+.loaner-overview-title a:hover,
+.loaner-overview-title a:focus-visible {
+    color: var(--color-accent);
+}
+
+
+
+.loaner-overview-info,
+.loaner-single-info {
+    margin: 0.45rem 0 0;
+    color: var(--color-text);
+    white-space: pre-line;
+}
+
+.loaner-overview-info--empty,
+.loaner-single-info--empty {
+    color: var(--color-muted);
+}
+
+.loaner-single-page {
+    padding: 1rem 0;
+    max-width: 640px;
+}
+
+.loaner-single-head {
+    margin-bottom: 0.6rem;
+}
+
+.loaner-single-content {
+    display: grid;
+    gap: 0.25rem;
+}
+
+.loaner-preview {
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+}
+
+.loaner-single-info-wrap {
+    min-width: 0;
+}
+
+
+
+.loaner-single-info {
+    margin: 0;
+    white-space: pre-line;
+}
+
+.loaner-history {
+    margin-top: 0.65rem;
+}
+
+.loaner-history-title {
+    margin: 0;
+}
+
+.loaner-history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--color-border-50);
+    border-radius: 4px;
+    background: var(--color-surface);
+}
+
+.loaner-history-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.35rem 0.45rem;
+}
+
+.loaner-history-row + .loaner-history-row {
+    border-top: 1px solid var(--color-border-50);
+}
+
+.loaner-history-link {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+    font-weight: 700;
+}
+
+.loaner-history-link:hover,
+.loaner-history-link:focus-visible {
+    color: var(--color-accent);
+}
+
+
+
+.loaner-history-date {
+    color: var(--color-muted);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.loaner-history-empty {
+    margin: 0;
+    color: var(--color-muted);
+}
+
 .loan-list-row.is-returned .loan-single-card {
     opacity: 0.72;
     background: color-mix(in srgb, var(--color-surface) 90%, #d9d9d9 10%);
 }
 
-.loan-list-row.is-returned .loan-single-title,
-.loan-list-row.is-returned .loan-single-title a,
 .loan-list-row.is-returned .loan-single-meta-item,
 .loan-list-row.is-returned .loan-single-items-toggle,
 .loan-list-row.is-returned .loan-summary-quantity,
 .loan-list-row.is-returned .loan-single-return-guard-code {
+    color: color-mix(in srgb, var(--color-text) 72%, #777 28%);
+}
+
+.loan-list-row.is-returned .loan-single-title,
+.loan-list-row.is-returned .loan-single-title a {
     color: color-mix(in srgb, var(--color-text) 72%, #777 28%);
 }
 
@@ -1281,10 +1479,13 @@ input.ui-input[required]:valid,
 
 .loan-single-page {
     padding: 1rem 0;
+    width: 100%;
+    max-width: 100%;
 }
 
 .loan-single-inner {
-    max-width: 640px;
+    width: 100%;
+    max-width: 100%;
 }
 
 .loan-single-notice {
@@ -1299,10 +1500,10 @@ input.ui-input[required]:valid,
 .loan-single-card {
     border: 2px solid var(--color-border);
     border-radius: 6px;
-    padding: 1rem;
+    padding: 0.85rem;
     background: var(--color-surface);
     display: grid;
-    gap: 1rem;
+    gap: 0.7rem;
 }
 
 .loan-list-row .loan-single-card {
@@ -1315,6 +1516,8 @@ input.ui-input[required]:valid,
 
 .loan-list-row .loan-single-title {
     font-size: 1.15rem;
+    color: var(--color-text);
+    text-transform: none;
 }
 
 .loan-single-head {
@@ -1323,12 +1526,16 @@ input.ui-input[required]:valid,
     justify-content: space-between;
     gap: 0.55rem;
     flex-wrap: wrap;
+    border-bottom: 1px solid var(--color-border-50);
+    padding-bottom: 0.4rem;
 }
 
 .loan-single-title {
     margin: 0;
-    color: var(--color-text);
-    font-size: var(--font-size-h2);
+    color: var(--color-accent);
+    font-size: 1.35rem;
+    line-height: 1;
+    text-transform: uppercase;
 }
 
 .loan-single-title a {
@@ -1343,15 +1550,21 @@ input.ui-input[required]:valid,
 
 .loan-list-row .loan-single-title a {
     display: inline;
+    color: var(--color-text);
     text-decoration: underline;
     text-underline-offset: 0.12em;
 }
 
-.loan-list-row .loan-single-title-cue {
-    display: inline;
-    margin-left: 0.08em;
-    text-decoration: inherit;
+.loan-list-row .loan-single-title a:visited {
+    color: var(--color-text);
 }
+
+.loan-list-row .loan-single-head {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+
 
 .loan-list-row .loan-single-title a:hover,
 .loan-list-row .loan-single-title a:focus-visible {
@@ -1370,9 +1583,21 @@ input.ui-input[required]:valid,
 .loan-single-meta-item {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: baseline;
     gap: 0.5rem;
     font-size: 0.95rem;
+}
+
+.loan-single-meta-item a,
+.loan-single-meta-item a:visited {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+}
+
+.loan-single-meta-item a:hover,
+.loan-single-meta-item a:focus-visible {
+    color: var(--color-accent);
 }
 
 .loan-single-meta-item .ui-label {

@@ -1,19 +1,51 @@
 <?php
 // register custom post type for "item" 
 
+function gs_asset_version(string $relative_path): ?string {
+    $asset_path = get_template_directory() . '/' . ltrim($relative_path, '/');
+
+    if (!file_exists($asset_path)) {
+        return null;
+    }
+
+    $hash = md5_file($asset_path);
+
+    if ($hash !== false) {
+        return $hash;
+    }
+
+    return (string) filemtime($asset_path);
+}
+
 function enqueue_style(){
-    wp_enqueue_style('gs-inventory-style', get_template_directory_uri() . '/style.css');
+    $style_version = gs_asset_version('style.css');
+
+    wp_enqueue_style(
+        'gs-inventory-style',
+        get_template_directory_uri() . '/style.css',
+        [],
+        $style_version
+    );
+
+    $zoom_script_version = gs_asset_version('assets/js/item-image-zoom.js');
+
     wp_enqueue_script(
         'gs-item-image-zoom',
         get_template_directory_uri() . '/assets/js/item-image-zoom.js',
         [],
-        null,
+        $zoom_script_version,
         true
     );
 }
 add_action('wp_enqueue_scripts', 'enqueue_style');
 
 function gs_register_theme_menus() {
+    add_theme_support('post-thumbnails');
+
+    // Item detail images: generate mobile and desktop-friendly variants.
+    add_image_size('gs-item-mobile', 640, 640, false);
+    add_image_size('gs-item-detail', 1200, 1200, false);
+
     register_nav_menus([
         'main-menu' => 'Main Menu',
     ]);
@@ -350,3 +382,48 @@ function gs_create_loaner_ajax() {
     ]);
 }
 add_action('wp_ajax_gs_create_loaner', 'gs_create_loaner_ajax');
+
+function gs_use_single_loaner_template($template) {
+    if (!is_singular('loaner')) {
+        return $template;
+    }
+
+    $loaner_template = locate_template('single-loaner.php');
+
+    if ($loaner_template) {
+        return $loaner_template;
+    }
+
+    return $template;
+}
+add_filter('template_include', 'gs_use_single_loaner_template');
+
+function gs_flush_rewrites_on_theme_switch() {
+    register_item_post_type();
+    register_item_taxonomies();
+    register_item_condition_taxonomy();
+    register_storage_locations_taxonomy();
+    register_loaner_post_type();
+    register_loan_post_type();
+    register_loan_item_post_type();
+    flush_rewrite_rules();
+}
+add_action('after_switch_theme', 'gs_flush_rewrites_on_theme_switch');
+
+function gs_maybe_flush_rewrites_once() {
+    if (get_option('gs_inventory_rewrites_flushed') === '1') {
+        return;
+    }
+
+    register_item_post_type();
+    register_item_taxonomies();
+    register_item_condition_taxonomy();
+    register_storage_locations_taxonomy();
+    register_loaner_post_type();
+    register_loan_post_type();
+    register_loan_item_post_type();
+
+    flush_rewrite_rules(false);
+    update_option('gs_inventory_rewrites_flushed', '1', false);
+}
+add_action('admin_init', 'gs_maybe_flush_rewrites_once');

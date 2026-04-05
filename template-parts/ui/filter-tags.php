@@ -68,9 +68,25 @@ if (!is_wp_error($all_terms)) {
         $terms_json[] = [
             'value' => $value,
             'name' => $display_name,
+            'taxonomy' => $taxonomy_name,
         ];
     }
 }
+
+usort($terms_json, function ($left, $right) {
+    $left_taxonomy = (string) ($left['taxonomy'] ?? '');
+    $right_taxonomy = (string) ($right['taxonomy'] ?? '');
+
+    $left_group = ($left_taxonomy === 'storage_locations') ? 1 : 0;
+    $right_group = ($right_taxonomy === 'storage_locations') ? 1 : 0;
+
+    if ($left_group !== $right_group) {
+        return $left_group <=> $right_group;
+    }
+
+    return strcasecmp((string) ($left['name'] ?? ''), (string) ($right['name'] ?? ''));
+});
+
 $terms_data = wp_json_encode($terms_json);
 ?>
 

@@ -60,6 +60,38 @@ $items = get_posts([
                             }
                         }
 
+                        // Fallback: include ACF tags field values when term relationships are not synced.
+                        $tags_field_value = get_field('tags', $item->ID);
+                        $tag_ids = [];
+
+                        if (is_numeric($tags_field_value)) {
+                            $tag_ids[] = (int) $tags_field_value;
+                        } elseif (is_object($tags_field_value) && isset($tags_field_value->term_id)) {
+                            $tag_ids[] = (int) $tags_field_value->term_id;
+                        } elseif (is_array($tags_field_value)) {
+                            foreach ($tags_field_value as $tag_item) {
+                                if (is_numeric($tag_item)) {
+                                    $tag_ids[] = (int) $tag_item;
+                                    continue;
+                                }
+
+                                if (is_object($tag_item) && isset($tag_item->term_id)) {
+                                    $tag_ids[] = (int) $tag_item->term_id;
+                                    continue;
+                                }
+
+                                if (is_array($tag_item) && isset($tag_item['term_id'])) {
+                                    $tag_ids[] = (int) $tag_item['term_id'];
+                                }
+                            }
+                        }
+
+                        foreach ($tag_ids as $tag_id) {
+                            if ($tag_id > 0) {
+                                $filter_terms[] = 'item_tag:' . $tag_id;
+                            }
+                        }
+
                         // Fallback: include ACF storage field values when term relationships are not synced.
                         $storage_field_value = get_field('storage-location', $item->ID);
                         if ($storage_field_value === null || $storage_field_value === false || $storage_field_value === '') {

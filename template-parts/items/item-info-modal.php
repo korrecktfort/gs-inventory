@@ -78,10 +78,18 @@
         if (imageRow && imageEl) {
             const imageUrl = openButton.dataset.itemImage || '';
             const imageAlt = openButton.dataset.itemImageAlt || openButton.dataset.itemName || 'Item image';
+            const imageSrcset = openButton.dataset.itemImageSrcset || '';
+            const imageSizes = openButton.dataset.itemImageSizes || '(max-width: 768px) 100vw, 24rem';
 
             if (imageUrl.length > 0) {
                 imageEl.src = imageUrl;
                 imageEl.alt = imageAlt;
+                if (imageSrcset.length > 0) {
+                    imageEl.srcset = imageSrcset;
+                } else {
+                    imageEl.removeAttribute('srcset');
+                }
+                imageEl.sizes = imageSizes;
                 imageEl.hidden = false;
                 if (imageWrap) {
                     imageWrap.hidden = false;
@@ -93,6 +101,8 @@
             } else {
                 imageEl.removeAttribute('src');
                 imageEl.alt = imageAlt;
+                imageEl.removeAttribute('srcset');
+                imageEl.removeAttribute('sizes');
                 imageEl.hidden = true;
                 if (imageWrap) {
                     imageWrap.hidden = true;

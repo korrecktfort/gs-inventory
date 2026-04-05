@@ -54,6 +54,22 @@ function initLoanFormChecklist() {
         return dueDateInput.value >= startDateInput.value;
     }
 
+    function syncDueDateConstraints() {
+        const startValue = (startDateInput.value || '').trim();
+
+        dueDateInput.min = startValue;
+
+        if (startValue !== '' && (dueDateInput.value || '').trim() !== '' && dueDateInput.value < startValue) {
+            dueDateInput.value = startValue;
+        }
+
+        if (!isDueDateOrderValid()) {
+            dueDateInput.setCustomValidity('Due date cannot be earlier than start date.');
+        } else {
+            dueDateInput.setCustomValidity('');
+        }
+    }
+
     function getRequirements() {
         return [
             {
@@ -101,6 +117,8 @@ function initLoanFormChecklist() {
     }
 
     form.addEventListener('submit', function (event) {
+        syncDueDateConstraints();
+
         const requirements = getRequirements();
         const firstMissing = requirements.find((item) => item.complete !== true);
 
@@ -120,8 +138,19 @@ function initLoanFormChecklist() {
         }
     });
 
+    startDateInput.addEventListener('input', function () {
+        syncDueDateConstraints();
+        renderFormRequirements();
+    });
+
+    dueDateInput.addEventListener('input', function () {
+        syncDueDateConstraints();
+        renderFormRequirements();
+    });
+
     form.addEventListener('input', renderFormRequirements);
     form.addEventListener('change', renderFormRequirements);
+    syncDueDateConstraints();
     renderFormRequirements();
 }
 

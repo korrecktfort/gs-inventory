@@ -10,6 +10,8 @@ $stock_total = (int) get_field('stock_total', $item_id);
 
 $image_url = '';
 $image_alt = '';
+$image_srcset = '';
+$image_sizes = '(max-width: 768px) 100vw, 24rem';
 $image_field = get_field('image', $item_id);
 $image_id = 0;
 
@@ -32,10 +34,12 @@ if ($image_id <= 0 && has_post_thumbnail($item_id)) {
 }
 
 if ($image_id > 0) {
-    $image_src = wp_get_attachment_image_src($image_id, 'large');
-    if (is_array($image_src) && !empty($image_src[0])) {
-        $image_url = (string) $image_src[0];
+    $image_url = (string) wp_get_attachment_image_url($image_id, 'gs-item-detail');
+    if ($image_url === '') {
+        $image_url = (string) wp_get_attachment_image_url($image_id, 'large');
     }
+
+    $image_srcset = (string) wp_get_attachment_image_srcset($image_id, 'gs-item-detail');
 
     if ($image_alt === '') {
         $image_alt_meta = get_post_meta($image_id, '_wp_attachment_image_alt', true);
@@ -95,6 +99,8 @@ $tag_names = array_values(array_unique($tag_names));
     data-item-tags="<?php echo esc_attr(wp_json_encode($tag_names)); ?>"
     data-item-image="<?php echo esc_url($image_url); ?>"
     data-item-image-alt="<?php echo esc_attr($image_alt); ?>"
+    data-item-image-srcset="<?php echo esc_attr($image_srcset); ?>"
+    data-item-image-sizes="<?php echo esc_attr($image_sizes); ?>"
 >
     <span class="item-info-trigger-label"><?php echo esc_html($item_name); ?></span>
 </button>

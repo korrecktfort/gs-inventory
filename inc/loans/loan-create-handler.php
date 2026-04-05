@@ -30,8 +30,16 @@ if (!function_exists('gs_handle_create_loan')) {
         $loan_status = sanitize_text_field($_POST['loan_status'] ?? 'active');
         $loan_start_date = sanitize_text_field($_POST['start_date'] ?? '');
         $loan_due_date = sanitize_text_field($_POST['due_date'] ?? '');
+        $current_user_id = get_current_user_id();
 
         $loan_items  = $_POST['loan_items'] ?? [];
+
+        if ($current_user_id <= 0) {
+            return [
+                'success' => false,
+                'message' => 'You need to be logged in to create a loan.',
+            ];
+        }
 
         if ($loan_title === '') {
             return [
@@ -45,6 +53,18 @@ if (!function_exists('gs_handle_create_loan')) {
                 'success' => false,
                 'message' => 'Please select a valid loaner.',
             ];
+        }
+
+        if ($loan_start_date !== '' && $loan_due_date !== '') {
+            $start_timestamp = strtotime($loan_start_date);
+            $due_timestamp = strtotime($loan_due_date);
+
+            if ($start_timestamp !== false && $due_timestamp !== false && $due_timestamp < $start_timestamp) {
+                return [
+                    'success' => false,
+                    'message' => 'Due date cannot be earlier than start date.',
+                ];
+            }
         }
 
         $loaned_quantities = gs_get_loaned_quantities_map();
@@ -92,6 +112,7 @@ if (!function_exists('gs_handle_create_loan')) {
             'post_type'   => 'loan',
             'post_status' => 'publish',
             'post_title'  => $loan_title,
+            'post_author' => $current_user_id,
         ]);
 
         if (is_wp_error($loan_id) || !$loan_id) {
@@ -105,6 +126,7 @@ if (!function_exists('gs_handle_create_loan')) {
         update_field('related_loaner', $loaner_id, $loan_id);
         update_field('start_date', $loan_start_date, $loan_id);
         update_field('due_date', $loan_due_date, $loan_id);
+        update_field('user', $current_user_id, $loan_id);
 
         foreach ($validated_items as $validated_item) {
             $item_id  = $validated_item['item_id'];
