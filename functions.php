@@ -6,6 +6,13 @@ function enqueue_style(){
 }
 add_action('wp_enqueue_scripts', 'enqueue_style');
 
+function gs_register_theme_menus() {
+    register_nav_menus([
+        'main-menu' => 'Main Menu',
+    ]);
+}
+add_action('after_setup_theme', 'gs_register_theme_menus');
+
 function register_item_post_type() {
     $labels = [
         'name' => 'Items',
