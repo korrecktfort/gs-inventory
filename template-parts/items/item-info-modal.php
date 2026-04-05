@@ -36,6 +36,10 @@
         const conditionValue = document.getElementById('item-modal-condition');
         const tagsRow = document.getElementById('item-modal-tags-row');
         const tagsList = document.getElementById('item-modal-tags');
+        const imageRow = document.getElementById('item-modal-image-row');
+        const imageWrap = document.getElementById('item-modal-image-wrap');
+        const imageEl = document.getElementById('item-modal-image');
+        const imageEmpty = document.getElementById('item-modal-image-empty');
 
         document.getElementById('item-modal-title').textContent = openButton.dataset.itemName || '';
         document.getElementById('item-modal-stock').textContent = openButton.dataset.itemStock || '';
@@ -69,6 +73,35 @@
             });
 
             tagsRow.hidden = tagNames.length === 0;
+        }
+
+        if (imageRow && imageEl) {
+            const imageUrl = openButton.dataset.itemImage || '';
+            const imageAlt = openButton.dataset.itemImageAlt || openButton.dataset.itemName || 'Item image';
+
+            if (imageUrl.length > 0) {
+                imageEl.src = imageUrl;
+                imageEl.alt = imageAlt;
+                imageEl.hidden = false;
+                if (imageWrap) {
+                    imageWrap.hidden = false;
+                }
+                if (imageEmpty) {
+                    imageEmpty.hidden = true;
+                }
+                imageRow.hidden = false;
+            } else {
+                imageEl.removeAttribute('src');
+                imageEl.alt = imageAlt;
+                imageEl.hidden = true;
+                if (imageWrap) {
+                    imageWrap.hidden = true;
+                }
+                if (imageEmpty) {
+                    imageEmpty.hidden = false;
+                }
+                imageRow.hidden = false;
+            }
         }
 
         modal.hidden = false;

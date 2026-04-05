@@ -3,6 +3,13 @@
 
 function enqueue_style(){
     wp_enqueue_style('gs-inventory-style', get_template_directory_uri() . '/style.css');
+    wp_enqueue_script(
+        'gs-item-image-zoom',
+        get_template_directory_uri() . '/assets/js/item-image-zoom.js',
+        [],
+        null,
+        true
+    );
 }
 add_action('wp_enqueue_scripts', 'enqueue_style');
 

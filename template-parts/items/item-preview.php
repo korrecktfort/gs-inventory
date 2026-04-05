@@ -7,6 +7,7 @@ $title_url = $args['title_url'] ?? '';
 $show_title = isset($args['show_title']) ? (bool) $args['show_title'] : true;
 $show_taxonomies = isset($args['show_taxonomies']) ? (bool) $args['show_taxonomies'] : false;
 $show_data_table = isset($args['show_data_table']) ? (bool) $args['show_data_table'] : false;
+$show_image = isset($args['show_image']) ? (bool) $args['show_image'] : true;
 
 $allowed_tags = ['h1', 'h2', 'h3', 'h4', 'p'];
 if (!in_array($title_tag, $allowed_tags, true)) {
@@ -23,6 +24,49 @@ $stock_total = $item_id ? (int) get_field('stock_total', $item_id) : 0;
 
 $condition_name = '';
 $tag_names = [];
+$image_url = '';
+$image_alt = '';
+
+if ($item_id && $show_image) {
+    $image_field = get_field('image', $item_id);
+    $image_id = 0;
+
+    if (is_array($image_field)) {
+        $image_id = (int) ($image_field['ID'] ?? $image_field['id'] ?? 0);
+
+        if ($image_id <= 0 && !empty($image_field['url'])) {
+            $image_url = (string) $image_field['url'];
+        }
+
+        if (!empty($image_field['alt']) && is_string($image_field['alt'])) {
+            $image_alt = trim($image_field['alt']);
+        }
+    } elseif (is_numeric($image_field)) {
+        $image_id = (int) $image_field;
+    }
+
+    if ($image_id <= 0 && has_post_thumbnail($item_id)) {
+        $image_id = (int) get_post_thumbnail_id($item_id);
+    }
+
+    if ($image_id > 0) {
+        $image_src = wp_get_attachment_image_src($image_id, 'large');
+        if (is_array($image_src) && !empty($image_src[0])) {
+            $image_url = (string) $image_src[0];
+        }
+
+        if ($image_alt === '') {
+            $image_alt_meta = get_post_meta($image_id, '_wp_attachment_image_alt', true);
+            if (is_string($image_alt_meta)) {
+                $image_alt = trim($image_alt_meta);
+            }
+        }
+    }
+}
+
+if ($image_alt === '') {
+    $image_alt = $item_name !== '' ? $item_name : 'Item image';
+}
 
 if ($show_taxonomies && $item_id) {
     $condition_value = get_field('condition', $item_id);
@@ -71,10 +115,12 @@ $stock_label = ($item_id || $mode === 'modal') ? (string) $stock_total : '0';
 $is_modal = ($mode === 'modal');
 $has_condition = ($condition_name !== '');
 $has_tags = !empty($tag_names);
+$has_image = ($show_image && $image_url !== '');
 $show_stock_in_header = ($show_data_table === false);
-$show_data_block = $show_data_table || $has_condition || $has_tags;
+$show_data_block = $show_data_table || $has_condition || $has_tags || $has_image;
 $render_condition_row = $has_condition || $is_modal;
 $render_tags_row = $has_tags || $is_modal;
+$render_image_row = $show_image && ($show_data_table || $has_image || $is_modal);
 ?>
 
 <article class="<?php echo esc_attr($article_class); ?>">
@@ -145,6 +191,37 @@ $render_tags_row = $has_tags || $is_modal;
                             <span class="item-preview-tag"><?php echo esc_html($tag_name); ?></span>
                         <?php endforeach; ?>
                     </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($render_image_row) : ?>
+                <div
+                    class="item-preview-data-row item-preview-data-row--image"
+                    <?php echo $is_modal ? 'id="item-modal-image-row"' : ''; ?>
+                >
+                    <span class="item-preview-data-key">Image:</span>
+                    <div
+                        class="item-preview-image-wrap"
+                        <?php echo $is_modal ? 'id="item-modal-image-wrap"' : ''; ?>
+                        <?php echo (!$has_image) ? 'hidden' : ''; ?>
+                    >
+                        <img
+                            class="item-preview-image"
+                            <?php echo $is_modal ? 'id="item-modal-image"' : ''; ?>
+                            src="<?php echo esc_url($image_url); ?>"
+                            alt="<?php echo esc_attr($image_alt); ?>"
+                            loading="lazy"
+                            decoding="async"
+                            <?php echo (!$has_image) ? 'hidden' : ''; ?>
+                        >
+                    </div>
+                    <span
+                        class="item-preview-image-empty"
+                        <?php echo $is_modal ? 'id="item-modal-image-empty"' : ''; ?>
+                        <?php echo $has_image ? 'hidden' : ''; ?>
+                    >
+                        No image
+                    </span>
                 </div>
             <?php endif; ?>
         </div>

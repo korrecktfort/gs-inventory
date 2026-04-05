@@ -19,13 +19,30 @@ $loanedQuantities = gs_get_loaned_quantities_map();
 
 <div class="item-list-panel">
     <div class="item-list-toolbar">
-        <?php get_template_part('template-parts/ui/filter-input', null, [
-        'filter_id' => 'item-filter',
-        'placeholder' => 'Filter items...',
-        'target' => '#loan-item-list',
-        'item_selector' => '.item-row',
-        'text_selector' => '.item-info-trigger',
-    ]); ?>
+        <div class="item-list-toolbar-row item-list-toolbar-search-row">
+            <div class="item-list-toolbar-section item-list-toolbar-search">
+                <?php get_template_part('template-parts/ui/filter-input', null, [
+                    'filter_id' => 'item-filter',
+                    'placeholder' => 'Filter items...',
+                    'target' => '#loan-item-list',
+                    'item_selector' => '.item-row',
+                    'text_selector' => '.item-info-trigger',
+                ]); ?>
+            </div>
+
+            <div class="item-list-toolbar-section item-list-toolbar-tags">
+                <?php get_template_part('template-parts/ui/filter-tags', null, [
+                    'target' => '#loan-item-list',
+                    'item_selector' => '.item-row',
+                    'tags_attribute' => 'data-item-tags',
+                    'taxonomy' => 'item_tag',
+                ]); ?>
+            </div>
+        </div>
+
+        <div id="filter-tags-selected" class="item-list-toolbar-tags-selected">
+            <!-- selected tags appear here -->
+        </div>
     </div>
 
     <div class="item-list-scroll">
@@ -38,11 +55,16 @@ $loanedQuantities = gs_get_loaned_quantities_map();
         $stock_total = (int) get_field('stock_total', $id); 
         $loaned = $loanedQuantities[$id] ?? 0;
         $available = max(0, $stock_total - $loaned);
-        $class_disabled = ($available <= 0) ? 'disabled' : '';        
+        $class_disabled = ($available <= 0) ? 'disabled' : '';
+        
+        // Get tags for this item
+        $tags = get_field('tags', $id);
+        $tag_ids = is_array($tags) ? $tags : [];
+        $tags_json = wp_json_encode($tag_ids);
     ?> 
 
 
-<div class="item-row <?php echo esc_attr($class_disabled); ?>" data-available="<?php echo esc_attr($available); ?>" data-stock-total="<?php echo esc_attr($stock_total); ?>">
+<div class="item-row <?php echo esc_attr($class_disabled); ?>" data-available="<?php echo esc_attr($available); ?>" data-stock-total="<?php echo esc_attr($stock_total); ?>" data-item-tags="<?php echo esc_attr($tags_json); ?>">
     
     <!-- Display Name -->
     <div class="item-name column"> 
