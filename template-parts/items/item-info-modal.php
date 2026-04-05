@@ -2,25 +2,17 @@
     <div class="item-modal-backdrop"></div>
 
     <div class="item-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="item-modal-title">
-        <button type="button" class="item-modal-close ui-button" aria-label="Close modal">×</button>
-
-        <h2 id="item-modal-title">Item Details</h2>
+        <div class="item-modal-head">
+            <h2 id="item-modal-title" class="item-modal-title"></h2>
+            <button type="button" class="item-modal-close ui-button" aria-label="Close modal">×</button>
+        </div>
 
         <div class="item-modal-content">
-            <div>
-                <strong>Name:</strong>
-                <span id="item-modal-name"></span>
-            </div>
-
-            <div>
-                <strong>Total Stock:</strong>
-                <span id="item-modal-stock"></span>
-            </div>
-
-            <div>
-                <strong>Notes:</strong>
-                <div id="item-modal-notes"></div>
-            </div>
+            <?php get_template_part('template-parts/items/item', 'preview', [
+                'mode' => 'modal',
+                'show_title' => false,
+                'root_class' => 'item-preview--modal-card',
+            ]); ?>
         </div>
     </div>
 </div>
@@ -38,9 +30,10 @@
     }
 
     if (openButton) {
-        document.getElementById('item-modal-name').textContent = openButton.dataset.itemName || '';
+        document.getElementById('item-modal-title').textContent = openButton.dataset.itemName || '';
         document.getElementById('item-modal-stock').textContent = openButton.dataset.itemStock || '';
         document.getElementById('item-modal-notes').textContent = openButton.dataset.itemNotes || '';
+        document.getElementById('item-modal-description').textContent = openButton.dataset.itemDescription || '';
 
         modal.hidden = false;
         return;
