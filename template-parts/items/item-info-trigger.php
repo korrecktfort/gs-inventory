@@ -18,5 +18,5 @@ $item_notes = get_field('notes', $item_id);
     data-item-stock="<?php echo esc_attr($stock_total); ?>"
     data-item-notes="<?php echo esc_attr(wp_strip_all_tags((string) $item_notes)); ?>"
 >
-    <?php echo esc_html($item_name); ?>
+    <span class="item-info-trigger-label"><?php echo esc_html($item_name); ?></span>
 </button>

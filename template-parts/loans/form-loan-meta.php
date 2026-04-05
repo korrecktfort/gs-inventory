@@ -231,6 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
         renderLoanerInfo(info);
         editButton.disabled = false;
         closeEditor();
+        picker.classList.add('has-selection');
 
         getOptions().forEach((item) => item.classList.remove('is-selected'));
         option.classList.add('is-selected');

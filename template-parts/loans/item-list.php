@@ -17,16 +17,18 @@ require_once get_template_directory() . '/inc/loans/loan-queries.php';
 $loanedQuantities = gs_get_loaned_quantities_map();
 ?>
 
-<section>
-    <?php get_template_part('template-parts/ui/filter-input', null, [
-    'filter_id' => 'item-filter',
-    'placeholder' => 'Filter items...',
-    'target' => '#loan-item-list',
-    'item_selector' => '.item-row',
-    'text_selector' => '.item-info-trigger',
-]); ?>
-</section>
+<div class="item-list-panel">
+    <div class="item-list-toolbar">
+        <?php get_template_part('template-parts/ui/filter-input', null, [
+        'filter_id' => 'item-filter',
+        'placeholder' => 'Filter items...',
+        'target' => '#loan-item-list',
+        'item_selector' => '.item-row',
+        'text_selector' => '.item-info-trigger',
+    ]); ?>
+    </div>
 
+    <div class="item-list-scroll">
 <?php foreach ($items as $item) : ?>
     
     <?php 
@@ -40,7 +42,7 @@ $loanedQuantities = gs_get_loaned_quantities_map();
     ?> 
 
 
-<div class="item-row <?php echo esc_attr($class_disabled); ?>" data-available="<?php echo esc_attr($available); ?>">
+<div class="item-row <?php echo esc_attr($class_disabled); ?>" data-available="<?php echo esc_attr($available); ?>" data-stock-total="<?php echo esc_attr($stock_total); ?>">
     
     <!-- Display Name -->
     <div class="item-name column"> 
@@ -49,7 +51,7 @@ $loanedQuantities = gs_get_loaned_quantities_map();
 
     <!-- Display Availability -->
     <div class="item-availability column">        
-        <p><?php echo esc_html($available) . "/" . esc_html($stock_total); ?></p>
+        <p class="item-availability-value"><?php echo esc_html($available) . "/" . esc_html($stock_total); ?></p>
     </div>
 
     <!-- Assign Quantity To Loan -->
@@ -70,11 +72,12 @@ $loanedQuantities = gs_get_loaned_quantities_map();
 
 </div>
 <?php endforeach; ?>
+</div>
+</div>
 </section>
 
-<section class="loan-summary">
-    <h2>Selected Items</h2>
-    <div class="loan-summary-list">
+<section class="loan-summary">    
+    <div class="loan-summary-list loan-summary-list--compact">
         <!-- Dynamically populated list of selected items will go here -->
     </div>
 </section>
@@ -149,7 +152,26 @@ document.addEventListener('input', function (event) {
 
     value = Math.max(0, Math.min(max, value));
     input.value = value;
+
+    syncRowState(row);
 });
+
+function syncRowState(row) {
+    const input = row.querySelector('.qty-input');
+    const availability = row.querySelector('.item-availability-value');
+
+    if (!input || !availability) {
+        return;
+    }
+
+    const selected = parseInt(input.value || 0, 10) || 0;
+    const availableBase = parseInt(row.dataset.available || 0, 10) || 0;
+    const stockTotal = parseInt(row.dataset.stockTotal || 0, 10) || 0;
+    const remaining = Math.max(0, availableBase - selected);
+
+    availability.textContent = remaining + '/' + stockTotal;
+    row.classList.toggle('is-selected', selected > 0);
+}
 
 function renderLoanSummary() {
     const summaryList = document.querySelector('.loan-summary-list');
@@ -182,58 +204,18 @@ function renderLoanSummary() {
     });
 
     if (selectedItems.length === 0) {
-        summaryList.innerHTML = '<p>No items selected yet.</p>';
+        summaryList.innerHTML = '<p class="loan-summary-empty">No items selected yet.</p>';
         return;
     }
 
-    summaryList.innerHTML = selectedItems
-        .map((item) => {
-            return `
-                <div class="loan-summary-row" data-item-id="${item.id}">
-                    <span class="loan-summary-name">${item.name}</span>
-                    <span class="loan-summary-quantity">${item.quantity}</span>
-                    <button type="button" class="qty-btn qty-reset-loan ui-button" data-item-name="${item.name}">Remove</button>
-                </div>
-            `;
-        })
-        .join('');
+    summaryList.innerHTML = `
+        <ul class="loan-summary-compact-list">
+            ${selectedItems
+                .map((item) => `<li><span class="loan-summary-name">${item.name}</span><span class="loan-summary-quantity">${item.quantity}</span></li>`)
+                .join('')}
+        </ul>
+    `;
 }
-
-document.addEventListener('click', function (event) {
-    const button = event.target.closest('.qty-reset-loan');
-
-    if (!button) {
-        return;
-    }
-
-    const itemName = button.dataset.itemName;
-
-    if (!itemName) {
-        return;
-    }
-
-    const rows = document.querySelectorAll('.item-row');
-
-    rows.forEach((row) => {
-        const nameElement = row.querySelector('.item-name');
-
-        if (!nameElement) {
-            return;
-        }
-
-        if (nameElement.textContent.trim() === itemName) {
-            const input = row.querySelector('.qty-input');
-
-            if (input) {
-                input.value = 0;
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-                input.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        }
-    });
-
-    renderLoanSummary();
-});
 
 document.addEventListener('input', function (event) {
     if (!event.target.closest('.qty-input')) {
@@ -244,6 +226,7 @@ document.addEventListener('input', function (event) {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.item-row').forEach(syncRowState);
     renderLoanSummary();
 });
 </script>
