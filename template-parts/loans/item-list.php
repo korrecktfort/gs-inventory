@@ -4,9 +4,14 @@ $items = get_posts([
     'posts_per_page' => -1,
     'orderby'        => 'title',
     'order'          => 'ASC',
-]);
-?>
+    ]);
+    ?>
 
+<section class="item-list" id="loan-item-list">
+    <div class="loan-title-field">
+        <label for="loan_title">Select Items</label>
+    </div>   
+    
 <?php 
 require_once get_template_directory() . '/inc/loans/loan-queries.php'; 
 $loanedQuantities = gs_get_loaned_quantities_map();
@@ -22,7 +27,6 @@ $loanedQuantities = gs_get_loaned_quantities_map();
 ]); ?>
 </section>
 
-<section class="item-list" id="loan-item-list">
 <?php foreach ($items as $item) : ?>
     
     <?php 
@@ -34,6 +38,7 @@ $loanedQuantities = gs_get_loaned_quantities_map();
         $available = max(0, $stock_total - $loaned);
         $class_disabled = ($available <= 0) ? 'disabled' : '';        
     ?> 
+
 
 <div class="item-row <?php echo esc_attr($class_disabled); ?>" data-available="<?php echo esc_attr($available); ?>">
     

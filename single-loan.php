@@ -26,6 +26,7 @@ $loan_items = get_posts([
     ],
 ]); 
 
+$loaner = get_field('related_loaner');
 $startDate = get_field('start_date', $loan_id);
 $dueDate = get_field('due_date', $loan_id);
 ?>
@@ -37,6 +38,15 @@ $dueDate = get_field('due_date', $loan_id);
 <?php endif; ?>
 
 <h3> Name: <?php echo esc_html(get_the_title()); ?> </h3>
+
+<?php
+if ($loaner) :
+?>
+    <div>
+        <strong>Loaner:</strong>
+        <?php echo esc_html(get_the_title($loaner)); ?>
+    </div>
+<?php endif; ?>
 
 <input type="text" value="<?php echo esc_attr($startDate); ?>" disabled>
 <input type="text" value="<?php echo esc_attr($dueDate); ?>" disabled>

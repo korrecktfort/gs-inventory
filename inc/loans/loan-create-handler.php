@@ -26,6 +26,7 @@ if (!function_exists('gs_handle_create_loan')) {
         }
 
         $loan_title  = sanitize_text_field($_POST['loan_title'] ?? '');
+        $loaner_id = isset($_POST['loaner_id']) ? (int) $_POST['loaner_id'] : 0;
         $loan_status = sanitize_text_field($_POST['loan_status'] ?? 'active');
         $loan_start_date = sanitize_text_field($_POST['start_date'] ?? '');
         $loan_due_date = sanitize_text_field($_POST['due_date'] ?? '');
@@ -36,6 +37,13 @@ if (!function_exists('gs_handle_create_loan')) {
             return [
                 'success' => false,
                 'message' => 'Loan title is required.',
+            ];
+        }
+
+        if ($loaner_id <= 0) {
+            return [
+                'success' => false,
+                'message' => 'Please select a valid loaner.',
             ];
         }
 
@@ -94,6 +102,7 @@ if (!function_exists('gs_handle_create_loan')) {
         }
 
         update_field('status', $loan_status, $loan_id);
+        update_field('related_loaner', $loaner_id, $loan_id);
         update_field('start_date', $loan_start_date, $loan_id);
         update_field('due_date', $loan_due_date, $loan_id);
 

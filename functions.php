@@ -46,37 +46,37 @@ function register_item_post_type() {
 }
 add_action('init', 'register_item_post_type');
 
-// // Register custom post type for "loaner"
-// function register_loaner_post_type() {
-//     $labels = [
-//         'name' => 'Loaners',
-//         'singular_name' => 'Loaner',
-//         'menu_name' => 'Loaners',
-//         'name_admin_bar' => 'Loaner',
-//         'add_new' => 'Add New',
-//         'add_new_item' => 'Add New Loaner',
-//         'new_item' => 'New Loaner',
-//         'edit_item' => 'Edit Loaner',
-//         'view_item' => 'View Loaner',
-//         'all_items' => 'All Loaners',
-//         'search_items' => 'Search Loaners',
-//         'not_found' => 'No loaners found.',
-//         'not_found_in_trash' => 'No loaners found in Trash.',
-//     ];
+// Register custom post type for "loaner"
+function register_loaner_post_type() {
+    $labels = [
+        'name' => 'Loaners',
+        'singular_name' => 'Loaner',
+        'menu_name' => 'Loaners',
+        'name_admin_bar' => 'Loaner',
+        'add_new' => 'Add New',
+        'add_new_item' => 'Add New Loaner',
+        'new_item' => 'New Loaner',
+        'edit_item' => 'Edit Loaner',
+        'view_item' => 'View Loaner',
+        'all_items' => 'All Loaners',
+        'search_items' => 'Search Loaners',
+        'not_found' => 'No loaners found.',
+        'not_found_in_trash' => 'No loaners found in Trash.',
+    ];
 
-//     $args = [
-//         'labels' => $labels,
-//         'public' => true,
-//         'has_archive' => true,
-//         'rewrite' => ['slug' => 'loaners'],
-//         'menu_icon' => 'dashicons-groups', // You can choose another icon if you prefer
-//         'supports' => ['title', 'editor', 'thumbnail', 'custom-fields'],
-//         'show_in_rest' => true,
-//     ];
+    $args = [
+        'labels' => $labels,
+        'public' => true,
+        'has_archive' => true,
+        'rewrite' => ['slug' => 'loaners'],
+        'menu_icon' => 'dashicons-groups', // You can choose another icon if you prefer
+        'supports' => ['title', 'editor', 'thumbnail', 'custom-fields'],
+        'show_in_rest' => true,
+    ];
 
-//     register_post_type('loaner', $args);
-// }
-// add_action('init', 'register_loaner_post_type');
+    register_post_type('loaner', $args);
+}
+add_action('init', 'register_loaner_post_type');
 
 // register custom post type for "loan"
 function register_loan_post_type() {
@@ -175,3 +175,81 @@ function register_loan_item_post_type() {
     register_post_type('loan_item', $args);
 }
 add_action('init', 'register_loan_item_post_type');
+
+function gs_update_loaner_info_ajax() {
+    if (!is_user_logged_in() || !current_user_can('read')) {
+        wp_send_json_error([
+            'message' => 'You are not allowed to do this.',
+        ], 403);
+    }
+
+    check_ajax_referer('gs_update_loaner_info', 'nonce');
+
+    $loaner_id = isset($_POST['loaner_id']) ? (int) $_POST['loaner_id'] : 0;
+    $info = isset($_POST['info']) ? sanitize_textarea_field(wp_unslash($_POST['info'])) : '';
+
+    if ($loaner_id <= 0 || get_post_type($loaner_id) !== 'loaner') {
+        wp_send_json_error([
+            'message' => 'Invalid loaner selected.',
+        ], 400);
+    }
+
+    if (function_exists('update_field')) {
+        update_field('info', $info, $loaner_id);
+    } else {
+        update_post_meta($loaner_id, 'info', $info);
+    }
+
+    wp_send_json_success([
+        'message' => 'Loaner info saved.',
+        'info' => $info,
+    ]);
+}
+add_action('wp_ajax_gs_update_loaner_info', 'gs_update_loaner_info_ajax');
+
+function gs_create_loaner_ajax() {
+    if (!is_user_logged_in() || !current_user_can('read')) {
+        wp_send_json_error([
+            'message' => 'You are not allowed to do this.',
+        ], 403);
+    }
+
+    check_ajax_referer('gs_create_loaner', 'nonce');
+
+    $name = isset($_POST['name']) ? sanitize_text_field(wp_unslash($_POST['name'])) : '';
+    $info = isset($_POST['info']) ? sanitize_textarea_field(wp_unslash($_POST['info'])) : '';
+
+    if ($name === '') {
+        wp_send_json_error([
+            'message' => 'Loaner name is required.',
+        ], 400);
+    }
+
+    $loaner_id = wp_insert_post([
+        'post_type'   => 'loaner',
+        'post_status' => 'publish',
+        'post_title'  => $name,
+    ]);
+
+    if (is_wp_error($loaner_id) || !$loaner_id) {
+        wp_send_json_error([
+            'message' => 'Could not create loaner.',
+        ], 500);
+    }
+
+    if (function_exists('update_field')) {
+        update_field('info', $info, $loaner_id);
+    } else {
+        update_post_meta($loaner_id, 'info', $info);
+    }
+
+    wp_send_json_success([
+        'message' => 'Loaner created.',
+        'loaner' => [
+            'id' => $loaner_id,
+            'title' => get_the_title($loaner_id),
+            'info' => $info,
+        ],
+    ]);
+}
+add_action('wp_ajax_gs_create_loaner', 'gs_create_loaner_ajax');
