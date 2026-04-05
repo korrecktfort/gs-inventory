@@ -19,6 +19,11 @@ Description: A minimal theme for inventory management
     --font-size-h1: 2rem;
     --font-size-h2: 1.5rem;
     --font-size-h3: 1.25rem;
+    --pill-padding-y: 0.1rem;
+    --pill-padding-x: 0.5rem;
+    --pill-font-size: 0.88rem;
+    --pill-bg: color-mix(in srgb, var(--color-surface) 82%, var(--color-border) 18%);
+    --pill-min-width: 2.6rem;
 }
 
 body {
@@ -127,20 +132,32 @@ h3 {
     white-space: nowrap;
 }
 
+.item-availability-value,
+.item-preview-stock-value,
+.item-preview-tag,
+.item-preview-condition-pill,
+.loan-summary-quantity,
+.loan-status-pill,
+.loan-single-return-guard-code {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--pill-padding-y) var(--pill-padding-x);
+    border: 1px solid var(--color-border-50);
+    border-radius: 999px;
+    background: var(--pill-bg);
+    font-size: var(--pill-font-size);
+    line-height: 1;
+    white-space: nowrap;
+}
+
 .item-availability {
     flex: 0 0 auto;
 }
 
 .item-availability-value {
     margin: 0;
-    white-space: nowrap;
-    display: inline-block;
-    padding: 0.1rem 0.55rem;
-    background: var(--color-border-50);
-    border-radius: 999px;
-    font-size: 0.85rem;
-    text-align: center;
-    min-width: 3.5rem;
+    min-width: var(--pill-min-width);
 }
 
 .item-row.is-selected .item-availability-value {
@@ -285,41 +302,44 @@ h3 {
 }
 
 .item-preview-stock-value {
-    display: inline-block;
-    min-width: 2.6rem;
+    min-width: var(--pill-min-width);
     text-align: center;
-    padding: 0.08rem 0.5rem;
-    border: 1px solid var(--color-border-50);
-    border-radius: 999px;
-    background: #ecfdf5;
 }
 
-.item-preview-meta {
+.item-preview-data {
     display: grid;
-    gap: 0.55rem;
+    gap: 0.3rem;
+    margin-top: 0.1rem;
 }
 
-.item-preview-section {
+.item-preview-data-row {
     display: grid;
-    gap: 0.18rem;
+    grid-template-columns: 5rem 1fr;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.item-preview-section-title {
-    margin: 0;
+.item-preview-data-key {
     color: var(--color-muted);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     line-height: 1;
 }
 
-.item-preview-notes,
-.item-preview-description {
-    margin: 0;
-    font-size: 0.95rem;
-    line-height: 1.3;
+.item-preview-tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
 }
 
-.item-preview-description p {
-    margin: 0;
+.item-preview-data-row .item-preview-tag-list,
+.item-preview-data-row .item-preview-stock-value {
+    justify-self: start;
+}
+
+.item-preview-data-row .item-preview-condition-pill,
+.item-preview-data-row .item-preview-tag {
+    justify-self: start;
+    width: fit-content;
 }
 
 .item-preview--single {
@@ -377,10 +397,7 @@ h3 {
     }
 
     .item-availability-value {
-        text-align: right;
-        min-width: 3rem;
-        padding-left: 0.35rem;
-        padding-right: 0.35rem;
+        min-width: var(--pill-min-width);
     }
 
     .item-quantity {
@@ -490,20 +507,9 @@ h3 {
     margin-bottom: 0.05rem;
 }
 
-.item-preview--modal .item-preview-stock .ui-label,
-.item-preview--modal .item-preview-section-title {
+.item-preview--modal .item-preview-stock .ui-label {
     font-size: 0.88rem;
     color: var(--color-muted);
-}
-
-.item-preview--modal .item-preview-stock-value {
-    font-size: 0.9rem;
-}
-
-.item-preview--modal .item-preview-notes,
-.item-preview--modal .item-preview-description {
-    font-size: 0.95rem;
-    line-height: 1.35;
 }
 
 .filter-input{
@@ -1041,14 +1047,7 @@ input.ui-input[required]:valid,
 }
 
 .loan-summary-quantity {
-    display: inline-block;
-    padding: 0.05rem 0.45rem;
-    background: var(--color-border-50);
-    border-radius: 999px;
-    font-size: 0.85rem;
-    text-align: center;
-    min-width: 1.8rem;
-    white-space: nowrap;
+    min-width: var(--pill-min-width);
     flex-shrink: 0;
 }
 
@@ -1157,14 +1156,7 @@ input.ui-input[required]:valid,
 }
 
 .loan-status-pill {
-    display: inline-flex;
-    align-items: center;
-    border: 1px solid var(--color-border-50);
-    border-radius: 999px;
-    padding: 0.1rem 0.5rem;
-    font-size: 0.95rem;
     text-transform: capitalize;
-    background: var(--color-surface);
 }
 
 .loan-status-pill--active {
@@ -1293,12 +1285,8 @@ input.ui-input[required]:valid,
 }
 
 .loan-single-return-guard-code {
-    display: inline-block;
-    min-width: 3.6rem;
+    min-width: var(--pill-min-width);
     text-align: center;
-    padding: 0.05rem 0.35rem;
-    border-radius: 999px;
-    background: var(--color-border-50);
     color: var(--color-text);
 }
 

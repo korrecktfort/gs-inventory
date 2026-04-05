@@ -13,8 +13,9 @@ get_header();
 				<div class="item-modal-content">
 					<?php get_template_part('template-parts/items/item', 'preview', [
 						'item_id' => get_the_ID(),
-						'description_source' => 'content',
 						'show_title' => false,
+						'show_taxonomies' => true,
+						'show_data_table' => true,
 						'root_class' => 'item-preview--single item-preview--modal',
 					]); ?>
 				</div>

@@ -39,12 +39,73 @@ function register_item_post_type() {
         'supports' => ['title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'],
         'show_in_rest' => true,        
         'capability_type' => 'post', // Use 'post' capabilities        
-        'taxonomies' => ['post_tag'], // Add default taxonomies if needed
+        'taxonomies' => ['item_tag', 'item_condition'],
     ];
 
     register_post_type('item', $args);
 }
 add_action('init', 'register_item_post_type');
+
+function register_item_taxonomies() {
+    $labels = [
+        'name' => 'Item Tags',
+        'singular_name' => 'Item Tag',
+        'search_items' => 'Search Item Tags',
+        'popular_items' => 'Popular Item Tags',
+        'all_items' => 'All Item Tags',
+        'edit_item' => 'Edit Item Tag',
+        'update_item' => 'Update Item Tag',
+        'add_new_item' => 'Add New Item Tag',
+        'new_item_name' => 'New Item Tag Name',
+        'separate_items_with_commas' => 'Separate item tags with commas',
+        'add_or_remove_items' => 'Add or remove item tags',
+        'choose_from_most_used' => 'Choose from the most used item tags',
+        'menu_name' => 'Item Tags',
+    ];
+
+    $args = [
+        'hierarchical' => false,
+        'labels' => $labels,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'update_count_callback' => '_update_post_term_count',
+        'query_var' => true,
+        'rewrite' => ['slug' => 'item-tag'],
+        'show_in_rest' => true,
+    ];
+
+    register_taxonomy('item_tag', ['item'], $args);
+}
+add_action('init', 'register_item_taxonomies');
+
+function register_item_condition_taxonomy() {
+    $labels = [
+        'name' => 'Item Conditions',
+        'singular_name' => 'Item Condition',
+        'search_items' => 'Search Item Conditions',
+        'all_items' => 'All Item Conditions',
+        'parent_item' => 'Parent Item Condition',
+        'parent_item_colon' => 'Parent Item Condition:',
+        'edit_item' => 'Edit Item Condition',
+        'update_item' => 'Update Item Condition',
+        'add_new_item' => 'Add New Item Condition',
+        'new_item_name' => 'New Item Condition Name',
+        'menu_name' => 'Item Conditions',
+    ];
+
+    $args = [
+        'hierarchical' => true,
+        'labels' => $labels,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'query_var' => true,
+        'rewrite' => ['slug' => 'item-condition'],
+        'show_in_rest' => true,
+    ];
+
+    register_taxonomy('item_condition', ['item'], $args);
+}
+add_action('init', 'register_item_condition_taxonomy');
 
 // Register custom post type for "loaner"
 function register_loaner_post_type() {

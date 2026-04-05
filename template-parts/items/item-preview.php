@@ -4,8 +4,9 @@ $mode = $args['mode'] ?? 'default';
 $root_class = trim((string) ($args['root_class'] ?? ''));
 $title_tag = $args['title_tag'] ?? 'h2';
 $title_url = $args['title_url'] ?? '';
-$description_source = $args['description_source'] ?? 'excerpt';
 $show_title = isset($args['show_title']) ? (bool) $args['show_title'] : true;
+$show_taxonomies = isset($args['show_taxonomies']) ? (bool) $args['show_taxonomies'] : false;
+$show_data_table = isset($args['show_data_table']) ? (bool) $args['show_data_table'] : false;
 
 $allowed_tags = ['h1', 'h2', 'h3', 'h4', 'p'];
 if (!in_array($title_tag, $allowed_tags, true)) {
@@ -19,21 +20,44 @@ if (!$item_id && !$can_render_placeholder) {
 
 $item_name = $item_id ? get_the_title($item_id) : '';
 $stock_total = $item_id ? (int) get_field('stock_total', $item_id) : 0;
-$item_notes = $item_id ? (string) get_field('notes', $item_id) : '';
 
-$raw_content = $item_id ? (string) get_post_field('post_content', $item_id) : '';
-$excerpt_text = $item_id ? (string) get_the_excerpt($item_id) : '';
-$description_text = $excerpt_text !== ''
-    ? $excerpt_text
-    : wp_trim_words(wp_strip_all_tags($raw_content), 40);
+$condition_name = '';
+$tag_names = [];
 
-$is_content_description = ($description_source === 'content');
-$description_html = $is_content_description
-    ? apply_filters('the_content', $raw_content)
-    : '<p>' . esc_html($description_text) . '</p>';
+if ($show_taxonomies && $item_id) {
+    $condition_value = get_field('condition', $item_id);
+    $condition_id = is_numeric($condition_value) ? (int) $condition_value : 0;
 
-$notes_text = trim($item_notes);
-$notes_display = ($notes_text !== '') ? $notes_text : 'No notes available.';
+    if ($condition_id > 0) {
+        $condition_term = get_term($condition_id, 'item_condition');
+        if ($condition_term && !is_wp_error($condition_term)) {
+            $condition_name = (string) $condition_term->name;
+        }
+    }
+
+    $tags_value = get_field('tags', $item_id);
+    $tag_ids = [];
+
+    if (is_array($tags_value)) {
+        $tag_ids = $tags_value;
+    } elseif (is_numeric($tags_value)) {
+        $tag_ids = [(int) $tags_value];
+    }
+
+    foreach ($tag_ids as $tag_id_raw) {
+        $tag_id = (int) $tag_id_raw;
+        if ($tag_id <= 0) {
+            continue;
+        }
+
+        $tag_term = get_term($tag_id, 'item_tag');
+        if ($tag_term && !is_wp_error($tag_term)) {
+            $tag_names[] = (string) $tag_term->name;
+        }
+    }
+
+    $tag_names = array_values(array_unique($tag_names));
+}
 
 $article_class = 'item-preview';
 if ($mode === 'modal') {
@@ -44,6 +68,13 @@ if ($root_class !== '') {
 }
 
 $stock_label = ($item_id || $mode === 'modal') ? (string) $stock_total : '0';
+$is_modal = ($mode === 'modal');
+$has_condition = ($condition_name !== '');
+$has_tags = !empty($tag_names);
+$show_stock_in_header = ($show_data_table === false);
+$show_data_block = $show_data_table || $has_condition || $has_tags;
+$render_condition_row = $has_condition || $is_modal;
+$render_tags_row = $has_tags || $is_modal;
 ?>
 
 <article class="<?php echo esc_attr($article_class); ?>">
@@ -61,27 +92,62 @@ $stock_label = ($item_id || $mode === 'modal') ? (string) $stock_total : '0';
             </<?php echo esc_attr($title_tag); ?>>
         <?php endif; ?>
 
-        <p class="item-preview-stock">
-            <span class="ui-label">Stock</span>
-            <span class="item-preview-stock-value"<?php echo ($mode === 'modal') ? ' id="item-modal-stock"' : ''; ?>>
-                <?php echo esc_html($stock_label); ?>
-            </span>
-        </p>
+        <?php if ($show_stock_in_header) : ?>
+            <p class="item-preview-stock">
+                <span class="ui-label">Stock:</span>
+                <span class="item-preview-stock-value"<?php echo ($mode === 'modal') ? ' id="item-modal-stock"' : ''; ?>>
+                    <?php echo esc_html($stock_label); ?>
+                </span>
+            </p>
+        <?php endif; ?>
     </header>
 
-    <div class="item-preview-meta">
-        <section class="item-preview-section">
-            <h3 class="item-preview-section-title">Notes</h3>
-            <p class="item-preview-notes"<?php echo ($mode === 'modal') ? ' id="item-modal-notes"' : ''; ?>>
-                <?php echo esc_html($notes_display); ?>
-            </p>
-        </section>
+    <?php if ($show_data_block) : ?>
+        <div class="item-preview-data">
+            <?php if ($show_data_table) : ?>
+                <div class="item-preview-data-row">
+                    <span class="item-preview-data-key">Stock:</span>
+                    <span class="item-preview-stock-value"<?php echo ($mode === 'modal') ? ' id="item-modal-stock"' : ''; ?>>
+                        <?php echo esc_html($stock_label); ?>
+                    </span>
+                </div>
+            <?php endif; ?>
 
-        <section class="item-preview-section">
-            <h3 class="item-preview-section-title">Description</h3>
-            <div class="item-preview-description"<?php echo ($mode === 'modal') ? ' id="item-modal-description"' : ''; ?>>
-                <?php echo $description_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-            </div>
-        </section>
-    </div>
+            <?php if ($render_condition_row) : ?>
+                <div
+                    class="item-preview-data-row"
+                    <?php echo $is_modal ? 'id="item-modal-condition-row"' : ''; ?>
+                    <?php echo ($is_modal && !$has_condition) ? 'hidden' : ''; ?>
+                >
+                    <span class="item-preview-data-key">Condition:</span>
+                    <span
+                        class="item-preview-tag item-preview-condition-pill"
+                        <?php echo $is_modal ? 'id="item-modal-condition"' : ''; ?>
+                    >
+                        <?php echo esc_html($condition_name); ?>
+                    </span>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($render_tags_row) : ?>
+                <div
+                    class="item-preview-data-row"
+                    <?php echo $is_modal ? 'id="item-modal-tags-row"' : ''; ?>
+                    <?php echo ($is_modal && !$has_tags) ? 'hidden' : ''; ?>
+                >
+                    <span class="item-preview-data-key">Tags:</span>
+                    <div
+                        class="item-preview-tag-list"
+                        aria-label="Item tags"
+                        <?php echo $is_modal ? 'id="item-modal-tags"' : ''; ?>
+                    >
+                        <?php foreach ($tag_names as $tag_name) : ?>
+                            <span class="item-preview-tag"><?php echo esc_html($tag_name); ?></span>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+
 </article>

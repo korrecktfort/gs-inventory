@@ -11,6 +11,8 @@
             <?php get_template_part('template-parts/items/item', 'preview', [
                 'mode' => 'modal',
                 'show_title' => false,
+                'show_taxonomies' => true,
+                'show_data_table' => true,
                 'root_class' => 'item-preview--modal-card',
             ]); ?>
         </div>
@@ -30,10 +32,44 @@
     }
 
     if (openButton) {
+        const conditionRow = document.getElementById('item-modal-condition-row');
+        const conditionValue = document.getElementById('item-modal-condition');
+        const tagsRow = document.getElementById('item-modal-tags-row');
+        const tagsList = document.getElementById('item-modal-tags');
+
         document.getElementById('item-modal-title').textContent = openButton.dataset.itemName || '';
         document.getElementById('item-modal-stock').textContent = openButton.dataset.itemStock || '';
-        document.getElementById('item-modal-notes').textContent = openButton.dataset.itemNotes || '';
-        document.getElementById('item-modal-description').textContent = openButton.dataset.itemDescription || '';
+
+        if (conditionRow && conditionValue) {
+            const conditionName = openButton.dataset.itemCondition || '';
+            conditionValue.textContent = conditionName;
+            conditionRow.hidden = conditionName.length === 0;
+        }
+
+        if (tagsRow && tagsList) {
+            let tagNames = [];
+            const rawTags = openButton.dataset.itemTags || '[]';
+
+            try {
+                const parsed = JSON.parse(rawTags);
+                if (Array.isArray(parsed)) {
+                    tagNames = parsed.filter((name) => typeof name === 'string' && name.length > 0);
+                }
+            } catch (error) {
+                tagNames = [];
+            }
+
+            tagsList.innerHTML = '';
+
+            tagNames.forEach((tagName) => {
+                const pill = document.createElement('span');
+                pill.className = 'item-preview-tag';
+                pill.textContent = tagName;
+                tagsList.appendChild(pill);
+            });
+
+            tagsRow.hidden = tagNames.length === 0;
+        }
 
         modal.hidden = false;
         return;
