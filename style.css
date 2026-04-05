@@ -459,7 +459,7 @@ h3 {
 .item-modal-dialog.item-single-dialog {
     width: 100%;
     max-width: 100%;
-    margin: 0;
+    margin: 0.75rem 0 0;
 }
 
 .item-modal-head {
