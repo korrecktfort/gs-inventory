@@ -9,7 +9,7 @@ $items = get_posts([
 
 <section class="item-list" id="loan-item-list">
     <div class="loan-title-field">
-        <label for="loan_title">Select Items</label>
+        <label for="item-filter" class="ui-label">Select Items</label>
     </div>   
     
 <?php 
@@ -20,7 +20,7 @@ $loanedQuantities = gs_get_loaned_quantities_map();
 <section>
     <?php get_template_part('template-parts/ui/filter-input', null, [
     'filter_id' => 'item-filter',
-    'placeholder' => 'Search items...',
+    'placeholder' => 'Filter items...',
     'target' => '#loan-item-list',
     'item_selector' => '.item-row',
     'text_selector' => '.item-info-trigger',
@@ -54,18 +54,18 @@ $loanedQuantities = gs_get_loaned_quantities_map();
 
     <!-- Assign Quantity To Loan -->
     <div class="item-quantity column">
-        <button type="button" class="qty-btn qty-reset">--</button>
-        <button type="button" class="qty-btn qty-minus">-</button>
+        <button type="button" class="qty-btn qty-reset ui-button">--</button>
+        <button type="button" class="qty-btn qty-minus ui-button">-</button>
         <input 
-        class = "qty-input"
+        class = "qty-input ui-input"
         type="number"
         name="loan_items[<?php echo $id_escaped; ?>][quantity]"
         min="0"
         max="<?php echo esc_attr($available); ?>"
         value="0"        
         >
-        <button type="button" class="qty-btn qty-plus">+</button>
-        <button type="button" class="qty-btn qty-max">++</button>
+        <button type="button" class="qty-btn qty-plus ui-button">+</button>
+        <button type="button" class="qty-btn qty-max ui-button">++</button>
     </div>
 
 </div>
@@ -192,7 +192,7 @@ function renderLoanSummary() {
                 <div class="loan-summary-row" data-item-id="${item.id}">
                     <span class="loan-summary-name">${item.name}</span>
                     <span class="loan-summary-quantity">${item.quantity}</span>
-                    <button type="button" class="qty-btn qty-reset-loan" data-item-name="${item.name}">Remove</button>
+                    <button type="button" class="qty-btn qty-reset-loan ui-button" data-item-name="${item.name}">Remove</button>
                 </div>
             `;
         })

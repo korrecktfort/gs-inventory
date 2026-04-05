@@ -5,12 +5,12 @@
         auth_redirect();
     }
 
-
-require_once get_template_directory() . '/inc/loans/loan-queries.php';
-
 get_header();
 
-get_template_part('template-parts/loans/loan', 'list');
+?>
+<h1><?php the_title(); ?></h1>
+<?php
+get_template_part('template-parts/loans/loan', 'overview');
 
 get_footer();
 ?>

@@ -12,7 +12,7 @@ $item_notes = get_field('notes', $item_id);
 
 <button
     type="button"
-    class="open-item-modal item-info-trigger"
+    class="open-item-modal item-info-trigger ui-button"
     data-item-id="<?php echo esc_attr($item_id); ?>"
     data-item-name="<?php echo esc_attr($item_name); ?>"
     data-item-stock="<?php echo esc_attr($stock_total); ?>"

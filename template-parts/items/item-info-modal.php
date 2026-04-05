@@ -2,7 +2,7 @@
     <div class="item-modal-backdrop"></div>
 
     <div class="item-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="item-modal-title">
-        <button type="button" class="item-modal-close" aria-label="Close modal">×</button>
+        <button type="button" class="item-modal-close ui-button" aria-label="Close modal">×</button>
 
         <h2 id="item-modal-title">Item Details</h2>
 

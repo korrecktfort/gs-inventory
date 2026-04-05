@@ -4,7 +4,7 @@
     <?php get_template_part('template-parts/loans/form', 'loan-meta'); ?>
     <?php get_template_part('template-parts/loans/item', 'list'); ?>
 
-    <button class="btn-submit" type="submit" name="create_loan_submit" value="1">
+    <button class="btn-submit ui-button" type="submit" name="create_loan_submit" value="1">
         Create Loan
     </button>
 </form>

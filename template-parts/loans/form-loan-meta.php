@@ -1,6 +1,6 @@
 <div class="loan-title-field">
-    <label for="loan_title">Loan Name</label>
-    <input class="text-field" type="text" name="loan_title" id="loan_title" required>
+    <label for="loan_title" class="ui-label">Loan Name</label>
+    <input class="text-field ui-input" type="text" name="loan_title" id="loan_title" required>
 </div>
 
 
@@ -15,7 +15,7 @@ $loaners = get_posts([
     ]);
     ?>
 
-<label for="loaner-search" class="loaner-label">Loaner</label>
+<label for="loaner-search" class="loaner-label ui-label">Loaner</label>
 <div
     class="loaner-picker"
     data-ajax-url="<?php echo esc_url(admin_url('admin-ajax.php')); ?>"
@@ -28,7 +28,7 @@ $loaners = get_posts([
         <input
             type="text"
             id="loaner-search"
-            class="loaner-search"
+            class="loaner-search ui-input"
             placeholder="Select loaner..."
             autocomplete="off"
             role="combobox"
@@ -36,7 +36,7 @@ $loaners = get_posts([
             aria-expanded="false"
             aria-controls="loaner-list"
         >
-        <button type="button" class="loaner-toggle" aria-label="Toggle loaner list">▾</button>
+        <button type="button" class="loaner-toggle ui-button" aria-label="Toggle loaner list">▾</button>
 
         <div class="loaner-list" id="loaner-list" hidden>
             <?php foreach ($loaners as $loaner) : ?>
@@ -62,34 +62,34 @@ $loaners = get_posts([
     <div class="loaner-info" id="loaner-info" aria-live="polite"></div>
 
     <div class="loaner-info-actions">
-        <button type="button" class="loaner-info-edit-btn" id="loaner-info-edit-btn" disabled>
+        <button type="button" class="loaner-info-edit-btn ui-button" id="loaner-info-edit-btn" disabled>
             Edit info
         </button>
-        <button type="button" class="loaner-info-add-btn" id="loaner-info-add-btn">
+        <button type="button" class="loaner-info-add-btn ui-button" id="loaner-info-add-btn">
             Add loaner
         </button>
     </div>
 
     <div class="loaner-info-editor" id="loaner-info-editor" hidden>
-        <label for="loaner-info-input">Edit loaner info</label>
-        <textarea id="loaner-info-input" class="loaner-info-input" rows="4"></textarea>
+        <label for="loaner-info-input" class="ui-label">Edit loaner info</label>
+        <textarea id="loaner-info-input" class="loaner-info-input ui-input" rows="4"></textarea>
         <div class="loaner-info-editor-actions">
-            <button type="button" class="loaner-info-save-btn" id="loaner-info-save-btn">Save</button>
-            <button type="button" class="loaner-info-cancel-btn" id="loaner-info-cancel-btn">Cancel</button>
+            <button type="button" class="loaner-info-save-btn ui-button" id="loaner-info-save-btn">Save</button>
+            <button type="button" class="loaner-info-cancel-btn ui-button" id="loaner-info-cancel-btn">Cancel</button>
         </div>
         <p class="loaner-info-status" id="loaner-info-status" role="status" aria-live="polite"></p>
     </div>
 
     <div class="loaner-create-editor" id="loaner-create-editor" hidden>
-        <label for="loaner-create-name">New loaner name</label>
-        <input type="text" id="loaner-create-name" class="loaner-create-name" maxlength="120">
+        <label for="loaner-create-name" class="ui-label">New loaner name</label>
+        <input type="text" id="loaner-create-name" class="loaner-create-name ui-input" maxlength="120">
 
-        <label for="loaner-create-info">New loaner info</label>
-        <textarea id="loaner-create-info" class="loaner-create-info" rows="4"></textarea>
+        <label for="loaner-create-info" class="ui-label">New loaner info</label>
+        <textarea id="loaner-create-info" class="loaner-create-info ui-input" rows="4"></textarea>
 
         <div class="loaner-info-editor-actions">
-            <button type="button" class="loaner-create-save-btn" id="loaner-create-save-btn">Save new loaner</button>
-            <button type="button" class="loaner-create-cancel-btn" id="loaner-create-cancel-btn">Cancel</button>
+            <button type="button" class="loaner-create-save-btn ui-button" id="loaner-create-save-btn">Save new loaner</button>
+            <button type="button" class="loaner-create-cancel-btn ui-button" id="loaner-create-cancel-btn">Cancel</button>
         </div>
         <p class="loaner-create-status" id="loaner-create-status" role="status" aria-live="polite"></p>
     </div>
@@ -99,13 +99,13 @@ $loaners = get_posts([
 
 <div class="loan-meta">   
     <div class="loan-meta-field">
-        <label for="start_date">Start Date</label>
-        <input class="date-field" type="date" name="start_date" id="start_date" required>
+        <label for="start_date" class="ui-label">Start Date</label>
+        <input class="date-field ui-input" type="date" name="start_date" id="start_date" required>
     </div>
 
     <div class ="loan-meta-field">
-        <label for="due_date">Due Date</label>
-        <input class="date-field" type="date" name="due_date" id="due_date" required>
+        <label for="due_date" class="ui-label">Due Date</label>
+        <input class="date-field ui-input" type="date" name="due_date" id="due_date" required>
     </div>
 
 </div>

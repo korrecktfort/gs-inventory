@@ -19,6 +19,10 @@ if (!empty($result['success']) && !empty($result['loan_id'])) {
 
 get_header();
 
+?>
+<h1><?php the_title(); ?></h1>
+<?php
+
 if (!empty($_GET['loan_created']) && !empty($_GET['loan_id'])) {
     $loan_id = (int) $_GET['loan_id'];
     $loan_title = get_the_title($loan_id);

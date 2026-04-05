@@ -8,19 +8,23 @@ $loans = get_posts([
 ]);
 ?>
 
-<?php get_template_part('template-parts/ui/filter-input', null, [
-    'filter_id' => 'loan-filter',
-    'placeholder' => 'Search loans...',
-    'target' => '#loan-list',
-    'item_selector' => '.loan-list-row',
-    'text_selector' => '.loan-list-title',
-]); ?>
-
 <section class="loan-list" id="loan-list">
-    <h1>Loans</h1>
+    <div class="loan-list-head">
+        <h1 class="loan-list-heading">Loans</h1>
+
+        <div class="loan-list-toolbar">
+            <?php get_template_part('template-parts/ui/filter-input', null, [
+                'filter_id' => 'loan-filter',
+                'placeholder' => 'Search loans...',
+                'target' => '#loan-list',
+                'item_selector' => '.loan-list-row',
+                'text_selector' => '.loan-list-title',
+            ]); ?>
+        </div>
+    </div>
 
     <?php if (empty($loans)) : ?>
-        <p>No loans found.</p>
+        <p class="loan-list-empty">No loans found.</p>
     <?php else : ?>
         <div class="loan-list-rows">
             <?php foreach ($loans as $loan) : ?>

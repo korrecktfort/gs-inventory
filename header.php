@@ -59,7 +59,3 @@
             });
         });
     </script>
-
-    <style>       
-        
-    </style>

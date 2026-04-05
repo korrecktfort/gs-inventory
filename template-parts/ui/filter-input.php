@@ -16,14 +16,14 @@ $text_selector = $args['text_selector'] ?? '';
     <input
         type="text"
         id="<?php echo esc_attr($filter_id); ?>"
-        class="filter-input-field"
+        class="filter-input-field ui-input"
         placeholder="<?php echo esc_attr($placeholder); ?>"
         autocomplete="off"
     >
 
     <button
         type="button"
-        class="filter-input-clear"
+        class="filter-input-clear ui-button"
         aria-label="Clear search"
         hidden
     >
