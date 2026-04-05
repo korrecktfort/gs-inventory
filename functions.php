@@ -36,6 +36,22 @@ function enqueue_style(){
         $zoom_script_version,
         true
     );
+
+    $scripts = [
+        'gs-nav'              => 'assets/js/nav.js',
+        'gs-filter-input'     => 'assets/js/filter-input.js',
+        'gs-filter-tags'      => 'assets/js/filter-tags.js',
+        'gs-item-modal'       => 'assets/js/item-modal.js',
+        'gs-item-list'        => 'assets/js/item-list.js',
+        'gs-loan-item-list'   => 'assets/js/loan-item-list.js',
+        'gs-loaner-picker'    => 'assets/js/loaner-picker.js',
+        'gs-loan-form'        => 'assets/js/loan-form.js',
+        'gs-loan-single-card' => 'assets/js/loan-single-card.js',
+    ];
+
+    foreach ($scripts as $handle => $path) {
+        wp_enqueue_script($handle, get_template_directory_uri() . '/' . $path, [], gs_asset_version($path), true);
+    }
 }
 add_action('wp_enqueue_scripts', 'enqueue_style');
 

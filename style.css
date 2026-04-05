@@ -330,17 +330,11 @@ h3 {
 }
 
 .gs-arrow-link::after {
-    content: '\2192';
+    content: '\2192' / '';
     display: inline;
     margin-left: 0;
     text-decoration: inherit;
     line-height: 1;
-    speak: never;
-}
-
-.item-overview-row .item-preview-title a:hover,
-.item-overview-row .item-preview-title a:focus-visible {
-    color: var(--color-accent);
 }
 
 .item-preview-stock {
@@ -524,15 +518,6 @@ h3 {
     }
 }
 
-/* Legacy fallback: keep old custom dropdown usable if present. */
-.loaner-select-dropdown {
-    color: var(--color-text);
-    font-family: var(--font);
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
 .item-modal-close {
     margin-left: auto;
     padding: 0;
@@ -549,11 +534,6 @@ h3 {
 .item-modal-close:focus-visible {
     border-color: var(--color-border-50);
     background: color-mix(in srgb, var(--color-surface) 70%, var(--color-border) 30%);
-}
-
-.loaner-select-dropdown:hover {
-    background-color: var(--color-border-dark-50);
-    color: var(--color-bg);
 }
 
 .item-modal-style {
@@ -1165,24 +1145,9 @@ input.ui-input[required]:valid,
     white-space: nowrap;
 }
 
-.loan-overview-page {
-    padding: 1rem 0;
-}
-
-.loan-overview-inner {
-    max-width: 920px;
-}
-
-.loan-list {        
+.loan-list {
     background: var(--color-bg);
-}
-
-.loan-list-head {
-    margin-bottom: 0.85rem;
-}
-
-.loan-list-heading {
-    margin: 0 0 0.6rem 0;
+    max-width: 640px;
 }
 
 .loan-list-toolbar {
@@ -1235,10 +1200,6 @@ input.ui-input[required]:valid,
     margin-top: 0.25rem;
     border-top: 1px solid var(--color-border-50);
     padding-top: 0.25rem;
-}
-
-.loan-list {
-    max-width: 640px;
 }
 
 .loan-list-panel {
@@ -1300,7 +1261,6 @@ input.ui-input[required]:valid,
     padding-top: 0.25rem;
 }
 
-.loaner-overview-card,
 .loaner-single-card {
     border: 1px solid var(--color-border-50);
     border-radius: 4px;
@@ -1338,16 +1298,6 @@ input.ui-input[required]:valid,
     color: var(--color-accent);
 }
 
-
-
-.loaner-overview-info,
-.loaner-single-info {
-    margin: 0.45rem 0 0;
-    color: var(--color-text);
-    white-space: pre-line;
-}
-
-.loaner-overview-info--empty,
 .loaner-single-info--empty {
     color: var(--color-muted);
 }
@@ -1377,10 +1327,9 @@ input.ui-input[required]:valid,
     min-width: 0;
 }
 
-
-
 .loaner-single-info {
     margin: 0;
+    color: var(--color-text);
     white-space: pre-line;
 }
 
@@ -1428,8 +1377,6 @@ input.ui-input[required]:valid,
 .loaner-history-link:focus-visible {
     color: var(--color-accent);
 }
-
-
 
 .loaner-history-date {
     color: var(--color-muted);

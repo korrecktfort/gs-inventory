@@ -84,7 +84,15 @@ $items_content_id = 'loan-items-content-' . $loan_id;
 $article_class = trim('loan-single-card ' . $root_class);
 ?>
 
-<article class="<?php echo esc_attr($article_class); ?>">
+<article
+    class="<?php echo esc_attr($article_class); ?>"
+    data-toggle-id="<?php echo esc_attr($items_toggle_id); ?>"
+    data-content-id="<?php echo esc_attr($items_content_id); ?>"
+    <?php if ($show_return_form && $status === 'active') : ?>
+    data-guard-input-id="<?php echo esc_attr($guard_input_id); ?>"
+    data-submit-id="<?php echo esc_attr($submit_button_id); ?>"
+    <?php endif; ?>
+>
     <div class="loan-single-head">
         <<?php echo esc_attr($title_tag); ?> class="loan-single-title">
             <?php if ($title_url !== '') : ?>
@@ -209,44 +217,5 @@ $article_class = trim('loan-single-card ' . $root_class);
         </div>
     </form>
 
-    <script>
-    (function () {
-        const guardInput = document.getElementById('<?php echo esc_js($guard_input_id); ?>');
-        const submitButton = document.getElementById('<?php echo esc_js($submit_button_id); ?>');
-
-        if (!guardInput || !submitButton) {
-            return;
-        }
-
-        const expected = guardInput.dataset.expected || '';
-
-        function updateReturnButtonState() {
-            const entered = (guardInput.value || '').trim();
-            submitButton.disabled = entered !== expected;
-        }
-
-        guardInput.addEventListener('input', updateReturnButtonState);
-        updateReturnButtonState();
-    })();
-    </script>
     <?php endif; ?>
-
-    <script>
-    (function () {
-        const itemsToggle = document.getElementById('<?php echo esc_js($items_toggle_id); ?>');
-        const itemsContent = document.getElementById('<?php echo esc_js($items_content_id); ?>');
-
-        if (!itemsToggle || !itemsContent) {
-            return;
-        }
-
-        itemsToggle.addEventListener('click', function () {
-            const isExpanded = itemsToggle.getAttribute('aria-expanded') === 'true';
-            const nextExpanded = !isExpanded;
-
-            itemsToggle.setAttribute('aria-expanded', nextExpanded ? 'true' : 'false');
-            itemsContent.hidden = !nextExpanded;
-        });
-    })();
-    </script>
 </article>
