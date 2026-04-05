@@ -46,7 +46,7 @@ function register_item_post_type() {
         'supports' => ['title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'],
         'show_in_rest' => true,        
         'capability_type' => 'post', // Use 'post' capabilities        
-        'taxonomies' => ['item_tag', 'item_condition'],
+        'taxonomies' => ['item_tag', 'item_condition', 'storage_locations'],
     ];
 
     register_post_type('item', $args);
@@ -113,6 +113,35 @@ function register_item_condition_taxonomy() {
     register_taxonomy('item_condition', ['item'], $args);
 }
 add_action('init', 'register_item_condition_taxonomy');
+
+function register_storage_locations_taxonomy() {
+    $labels = [
+        'name' => 'Storage Locations',
+        'singular_name' => 'Storage Location',
+        'search_items' => 'Search Storage Locations',
+        'all_items' => 'All Storage Locations',
+        'parent_item' => 'Parent Storage Location',
+        'parent_item_colon' => 'Parent Storage Location:',
+        'edit_item' => 'Edit Storage Location',
+        'update_item' => 'Update Storage Location',
+        'add_new_item' => 'Add New Storage Location',
+        'new_item_name' => 'New Storage Location Name',
+        'menu_name' => 'Storage Locations',
+    ];
+
+    $args = [
+        'hierarchical' => true,
+        'labels' => $labels,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'query_var' => true,
+        'rewrite' => ['slug' => 'storage-location'],
+        'show_in_rest' => true,
+    ];
+
+    register_taxonomy('storage_locations', ['item'], $args);
+}
+add_action('init', 'register_storage_locations_taxonomy');
 
 // Register custom post type for "loaner"
 function register_loaner_post_type() {

@@ -7,17 +7,43 @@
  *   - target: CSS selector for container of items to filter
  *   - item_selector: CSS selector for individual item rows
  *   - tags_attribute: data attribute name containing tag IDs (default: data-item-tags)
- *   - taxonomy: taxonomy name (default: item_tag)
+ *   - taxonomy: single taxonomy name (backward compatible)
+ *   - taxonomies: taxonomy names array (preferred)
  */
 
 $target = $args['target'] ?? '';
 $item_selector = $args['item_selector'] ?? '';
-$tags_attribute = $args['tags_attribute'] ?? 'data-item-tags';
-$taxonomy = $args['taxonomy'] ?? 'item_tag';
+$tags_attribute = $args['tags_attribute'] ?? 'data-item-filter-terms';
+
+$taxonomies_arg = $args['taxonomies'] ?? ($args['taxonomy'] ?? 'item_tag');
+$taxonomies = is_array($taxonomies_arg) ? $taxonomies_arg : [$taxonomies_arg];
+$taxonomies = array_values(array_filter(array_unique(array_map('strval', $taxonomies)), function ($taxonomy_name) {
+    return taxonomy_exists($taxonomy_name);
+}));
+
+if (empty($taxonomies)) {
+    $taxonomies = ['item_tag'];
+}
+
+$taxonomy_labels = [];
+foreach ($taxonomies as $taxonomy_name) {
+    $taxonomy_object = get_taxonomy($taxonomy_name);
+    $label = $taxonomy_name;
+
+    if ($taxonomy_object && isset($taxonomy_object->labels->singular_name)) {
+        $label = (string) $taxonomy_object->labels->singular_name;
+    }
+
+    if ($taxonomy_name === 'storage_locations') {
+        $label = 'Storage';
+    }
+
+    $taxonomy_labels[$taxonomy_name] = $label;
+}
 
 // Fetch all terms from the taxonomy
 $all_terms = get_terms([
-    'taxonomy' => $taxonomy,
+    'taxonomy' => $taxonomies,
     'hide_empty' => false,
     'orderby' => 'name',
     'order' => 'ASC',
@@ -26,9 +52,18 @@ $all_terms = get_terms([
 $terms_json = [];
 if (!is_wp_error($all_terms)) {
     foreach ($all_terms as $term) {
+        $taxonomy_name = (string) $term->taxonomy;
+        $taxonomy_label = $taxonomy_labels[$taxonomy_name] ?? $taxonomy_name;
+        $value = $taxonomy_name . ':' . (string) $term->term_id;
+        $display_name = $term->name;
+
+        if (count($taxonomies) > 1 && $taxonomy_name !== 'item_tag') {
+            $display_name = $taxonomy_label . ': ' . $term->name;
+        }
+
         $terms_json[] = [
-            'id' => $term->term_id,
-            'name' => $term->name,
+            'value' => $value,
+            'name' => $display_name,
         ];
     }
 }
@@ -101,8 +136,8 @@ document.addEventListener('DOMContentLoaded', function () {
             button.type = 'button';
             button.className = 'filter-tags-option';
             button.textContent = term.name;
-            button.dataset.tagId = term.id;
-            button.addEventListener('click', () => selectTag(term.id, term.name));
+            button.dataset.termValue = term.value;
+            button.addEventListener('click', () => selectTag(term.value, term.name));
             tagsList.appendChild(button);
         });
     }
@@ -114,16 +149,16 @@ document.addEventListener('DOMContentLoaded', function () {
         options.forEach((option) => {
             const text = option.textContent.trim().toLowerCase();
             const isMatch = query.length === 0 || text.includes(query);
-            const isSelected = selectedTags.some(t => t.id == option.dataset.tagId);
+            const isSelected = selectedTags.some(t => t.value === option.dataset.termValue);
             option.hidden = !isMatch || isSelected;
         });
     }
     
-    function selectTag(tagId, tagName) {
+    function selectTag(termValue, termName) {
         // Prevent duplicates
-        if (selectedTags.some(t => t.id == tagId)) return;
+        if (selectedTags.some(t => t.value === termValue)) return;
         
-        selectedTags.push({ id: tagId, name: tagName });
+        selectedTags.push({ value: termValue, name: termName });
         renderSelectedTags();
         applyFilter();
         renderTagOptions();
@@ -132,8 +167,8 @@ document.addEventListener('DOMContentLoaded', function () {
         searchInput.focus();
     }
     
-    function removeTag(tagId) {
-        selectedTags = selectedTags.filter(t => t.id != tagId);
+    function removeTag(termValue) {
+        selectedTags = selectedTags.filter(t => t.value !== termValue);
         renderSelectedTags();
         applyFilter();
         renderTagOptions();
@@ -170,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function () {
             removeBtn.className = 'filter-tags-pill-remove ui-button';
             removeBtn.innerHTML = '×';
             removeBtn.setAttribute('aria-label', 'Remove ' + tag.name);
-            removeBtn.addEventListener('click', () => removeTag(tag.id));
+            removeBtn.addEventListener('click', () => removeTag(tag.value));
             pill.appendChild(removeBtn);
             
             selectedContainer.appendChild(pill);
@@ -186,24 +221,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
     function applyFilter() {
-        const selectedTagIds = selectedTags.map(tag => String(tag.id));
+        const selectedTermValues = selectedTags.map(tag => String(tag.value));
         const items = target.querySelectorAll(itemSelector);
         
         items.forEach((item) => {
             const tagsJson = item.getAttribute(tagsAttribute);
-            let itemTags = [];
+            let itemTerms = [];
             
             try {
                 if (tagsJson) {
                     const parsed = JSON.parse(tagsJson);
-                    itemTags = Array.isArray(parsed) ? parsed.map(String) : [];
+                    itemTerms = Array.isArray(parsed) ? parsed.map(String) : [];
                 }
             } catch (e) {
                 console.warn('Failed to parse tags:', e);
             }
             
-            // Show item if no tags selected, or if item has at least one selected tag (OR logic)
-            const matches = selectedTagIds.length === 0 || selectedTagIds.some(tagId => itemTags.includes(tagId));
+            // Show item if no terms selected, or if item has at least one selected term (OR logic)
+            const matches = selectedTermValues.length === 0 || selectedTermValues.some(termValue => itemTerms.includes(termValue));
             item.style.display = matches ? '' : 'none';
         });
     }

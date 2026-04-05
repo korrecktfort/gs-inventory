@@ -34,8 +34,8 @@ $loanedQuantities = gs_get_loaned_quantities_map();
                 <?php get_template_part('template-parts/ui/filter-tags', null, [
                     'target' => '#loan-item-list',
                     'item_selector' => '.item-row',
-                    'tags_attribute' => 'data-item-tags',
-                    'taxonomy' => 'item_tag',
+                    'tags_attribute' => 'data-item-filter-terms',
+                    'taxonomies' => ['item_tag', 'storage_locations'],
                 ]); ?>
             </div>
         </div>
@@ -57,14 +57,64 @@ $loanedQuantities = gs_get_loaned_quantities_map();
         $available = max(0, $stock_total - $loaned);
         $class_disabled = ($available <= 0) ? 'disabled' : '';
         
-        // Get tags for this item
-        $tags = get_field('tags', $id);
-        $tag_ids = is_array($tags) ? $tags : [];
-        $tags_json = wp_json_encode($tag_ids);
+        $filter_terms = [];
+        $terms = wp_get_object_terms($id, ['item_tag', 'storage_locations']);
+
+        if (!is_wp_error($terms)) {
+            foreach ($terms as $term) {
+                $term_id = (int) ($term->term_id ?? 0);
+                $taxonomy_name = (string) ($term->taxonomy ?? '');
+
+                if ($term_id <= 0 || $taxonomy_name === '') {
+                    continue;
+                }
+
+                $filter_terms[] = $taxonomy_name . ':' . $term_id;
+            }
+        }
+
+        // Fallback: include ACF storage field values even when term relationships are not synced.
+        $storage_field_value = get_field('storage-location', $id);
+        if ($storage_field_value === null || $storage_field_value === false || $storage_field_value === '') {
+            $storage_field_value = get_field('storage_location', $id);
+        }
+
+        $storage_ids = [];
+
+        if (is_numeric($storage_field_value)) {
+            $storage_ids[] = (int) $storage_field_value;
+        } elseif (is_object($storage_field_value) && isset($storage_field_value->term_id)) {
+            $storage_ids[] = (int) $storage_field_value->term_id;
+        } elseif (is_array($storage_field_value)) {
+            foreach ($storage_field_value as $storage_item) {
+                if (is_numeric($storage_item)) {
+                    $storage_ids[] = (int) $storage_item;
+                    continue;
+                }
+
+                if (is_object($storage_item) && isset($storage_item->term_id)) {
+                    $storage_ids[] = (int) $storage_item->term_id;
+                    continue;
+                }
+
+                if (is_array($storage_item) && isset($storage_item['term_id'])) {
+                    $storage_ids[] = (int) $storage_item['term_id'];
+                }
+            }
+        }
+
+        foreach ($storage_ids as $storage_id) {
+            if ($storage_id > 0) {
+                $filter_terms[] = 'storage_locations:' . $storage_id;
+            }
+        }
+
+        $filter_terms = array_values(array_unique($filter_terms));
+        $filter_terms_json = wp_json_encode($filter_terms);
     ?> 
 
 
-<div class="item-row <?php echo esc_attr($class_disabled); ?>" data-available="<?php echo esc_attr($available); ?>" data-stock-total="<?php echo esc_attr($stock_total); ?>" data-item-tags="<?php echo esc_attr($tags_json); ?>">
+<div class="item-row <?php echo esc_attr($class_disabled); ?>" data-available="<?php echo esc_attr($available); ?>" data-stock-total="<?php echo esc_attr($stock_total); ?>" data-item-filter-terms="<?php echo esc_attr($filter_terms_json); ?>">
     
     <!-- Display Name -->
     <div class="item-name column"> 
