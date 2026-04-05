@@ -31,7 +31,7 @@ $status = get_field('status', $loan_id);
 $status_label = (string) ($status ?: 'unknown');
 $status_key = sanitize_html_class(strtolower($status_label));
 
-$format_date_with_weekday = static function ($date_value) {
+$format_date_for_display = static function ($date_value) {
     if (empty($date_value)) {
         return '—';
     }
@@ -60,12 +60,12 @@ $format_date_with_weekday = static function ($date_value) {
         return $raw;
     }
 
-    return sprintf('%s (%s)', $raw, wp_date('l', $timestamp));
+    return sprintf('%s (%s)', wp_date('d.m.Y', $timestamp), wp_date('l', $timestamp));
 };
 
-$start_date_display = $format_date_with_weekday($start_date);
-$due_date_display = $format_date_with_weekday($due_date);
-$return_guard_code = (string) wp_rand(10000, 99999);
+$start_date_display = $format_date_for_display($start_date);
+$due_date_display = $format_date_for_display($due_date);
+$return_guard_code = (string) wp_rand(100, 999);
 $guard_input_id = 'return-confirm-code-' . $loan_id;
 $submit_button_id = 'return-loan-submit-' . $loan_id;
 $items_toggle_id = 'loan-items-toggle-' . $loan_id;
@@ -158,15 +158,15 @@ $article_class = trim('loan-single-card ' . $root_class);
         <div class="loan-single-return-inline">
             <span class="loan-single-return-guard-code"><?php echo esc_html($return_guard_code); ?></span>
             <input
-                type="text"
+                type="number"
                 id="<?php echo esc_attr($guard_input_id); ?>"
                 class="ui-input loan-single-return-guard-input"
                 inputmode="numeric"
-                pattern="[0-9]{5}"
-                maxlength="5"
+                min="100"
+                max="999"
+                step="1"
                 autocomplete="off"
-                placeholder="Enter code"
-                aria-label="Enter the 5-digit confirmation code"
+                aria-label="Enter the 3-digit confirmation code"
                 data-expected="<?php echo esc_attr($return_guard_code); ?>"
             >
             <button

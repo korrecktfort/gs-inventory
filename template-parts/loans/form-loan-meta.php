@@ -233,6 +233,9 @@ document.addEventListener('DOMContentLoaded', function () {
         closeEditor();
         picker.classList.add('has-selection');
 
+        hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+        hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+
         getOptions().forEach((item) => item.classList.remove('is-selected'));
         option.classList.add('is-selected');
 
