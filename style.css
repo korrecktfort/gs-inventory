@@ -237,6 +237,30 @@ h3 {
     padding-bottom: 0.45rem;
 }
 
+.item-list-toolbar-condition-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.item-quick-filter-chip {
+    padding: var(--pill-padding-y) var(--pill-padding-x);
+    border: 1px solid var(--color-border-50);
+    border-radius: 999px;
+    background: var(--pill-bg);
+    font-size: var(--pill-font-size);
+    line-height: 1;
+}
+
+.item-quick-filter-chip.is-active {
+    border-color: var(--color-border-dark);
+    background: color-mix(in srgb, var(--color-border) 20%, var(--color-surface) 80%);
+}
+
+.item-list-empty--filtered {
+    margin: 0.45rem 0.45rem 0.55rem;
+}
+
 .item-list-scroll {
     max-height: 34rem;
     overflow-y: auto;

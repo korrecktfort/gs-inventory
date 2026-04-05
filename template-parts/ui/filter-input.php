@@ -66,6 +66,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 item.style.display = matches ? '' : 'none';
             });
+
+            target.dispatchEvent(new CustomEvent('gs:filter-updated', { bubbles: true }));
         }
 
         input.addEventListener('input', applyFilter);

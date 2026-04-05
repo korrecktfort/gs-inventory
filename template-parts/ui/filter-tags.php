@@ -38,6 +38,10 @@ foreach ($taxonomies as $taxonomy_name) {
         $label = 'Storage';
     }
 
+    if ($taxonomy_name === 'item_condition') {
+        $label = 'Condition';
+    }
+
     $taxonomy_labels[$taxonomy_name] = $label;
 }
 
@@ -102,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const toggleButton = filterRoot.querySelector('.filter-tags-toggle');
     const tagsList = filterRoot.querySelector('#filter-tags-list');
     const selectedContainer = document.querySelector('#filter-tags-selected');
+    const filterPanel = filterRoot.closest('.item-list-panel') || document;
     
     if (!target || !itemSelector || !searchInput || !toggleButton || !tagsList || !selectedContainer) return;
     
@@ -173,6 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
         applyFilter();
         renderTagOptions();
         filterTagOptions();
+        syncQuickFilterChips();
     }
 
     function clearAllTags() {
@@ -181,7 +187,19 @@ document.addEventListener('DOMContentLoaded', function () {
         applyFilter();
         renderTagOptions();
         filterTagOptions();
+        syncQuickFilterChips();
         searchInput.focus();
+    }
+
+    function syncQuickFilterChips() {
+        const chips = filterPanel.querySelectorAll('.item-quick-filter-chip[data-term-value]');
+
+        chips.forEach((chip) => {
+            const termValue = chip.getAttribute('data-term-value') || '';
+            const active = selectedTags.some((tag) => tag.value === termValue);
+            chip.classList.toggle('is-active', active);
+            chip.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
     }
     
     function renderSelectedTags() {
@@ -241,6 +259,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const matches = selectedTermValues.length === 0 || selectedTermValues.some(termValue => itemTerms.includes(termValue));
             item.style.display = matches ? '' : 'none';
         });
+
+        target.dispatchEvent(new CustomEvent('gs:filter-updated', { bubbles: true }));
     }
     
     // Initial render
@@ -265,6 +285,28 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     
     searchInput.addEventListener('input', filterTagOptions);
+
+    filterPanel.addEventListener('click', (event) => {
+        const chip = event.target.closest('.item-quick-filter-chip[data-term-value]');
+
+        if (!chip) {
+            return;
+        }
+
+        const termValue = chip.getAttribute('data-term-value') || '';
+        const termName = chip.getAttribute('data-term-name') || chip.textContent.trim();
+
+        if (termValue === '') {
+            return;
+        }
+
+        if (selectedTags.some((tag) => tag.value === termValue)) {
+            removeTag(termValue);
+            return;
+        }
+
+        selectTag(termValue, termName);
+    });
     
     // Close list when clicking outside
     document.addEventListener('click', (e) => {
@@ -272,5 +314,7 @@ document.addEventListener('DOMContentLoaded', function () {
             closeList();
         }
     });
+
+    syncQuickFilterChips();
 });
 </script>
