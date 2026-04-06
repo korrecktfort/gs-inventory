@@ -74,6 +74,8 @@ h3 {
     padding: 2px;
 }
 
+/* Item selection list */
+
 .item-row {
     display: flex;
     justify-content: space-between;
@@ -298,6 +300,8 @@ h3 {
     padding-top: 0.25rem;
 }
 
+/* Item preview cards */
+
 .item-preview {
     border: 2px solid var(--color-border);
     border-radius: 6px;
@@ -483,6 +487,8 @@ h3 {
     max-width: 100%;
     margin: 0;
 }
+
+/* Site navigation */
 
 .gs-nav-wrap {
     max-width: 1100px;
@@ -886,19 +892,6 @@ h3 {
 
 .item-modal-content {
     margin-top: 0.55rem;
-}
-
-.item-preview--modal .item-preview-head {
-    justify-content: flex-start;
-}
-
-.item-preview--modal .item-preview-stock {
-    margin-bottom: 0.05rem;
-}
-
-.item-preview--modal .item-preview-stock .ui-label {
-    font-size: 0.88rem;
-    color: var(--color-muted);
 }
 
 .filter-input{
