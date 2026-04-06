@@ -1,0 +1,20 @@
+
+PHP CODE SNIFFER VIOLATION SOURCE SUMMARY
+--------------------------------------------------------------------------------
+STANDARD  CATEGORY            SNIFF                                        COUNT
+--------------------------------------------------------------------------------
+Squiz     Commenting          Function comment missing                     23
+WordPres  PHP                 Yoda conditions not yoda                     12
+Squiz     Commenting          Inline comment invalid end char              9
+Squiz     Commenting          File comment missing                         6
+Squiz     Commenting          Function comment wrong style                 4
+Squiz     PHP                 Commented out code found                     3
+Generic   Code analysis       Unused function parameter found after last   2
+Universa  Operators           Disallow short ternary found                 2
+Squiz     Commenting          File comment wrong style                     1
+--------------------------------------------------------------------------------
+A TOTAL OF 62 SNIFF VIOLATIONS WERE FOUND IN 9 SOURCES
+--------------------------------------------------------------------------------
+
+Time: 1.08 secs; Memory: 18MB
+

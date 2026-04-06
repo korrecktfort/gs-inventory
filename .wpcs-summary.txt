@@ -1,0 +1,47 @@
+
+PHP CODE SNIFFER REPORT SUMMARY
+----------------------------------------------------------------------
+FILE                                                  ERRORS  WARNINGS
+----------------------------------------------------------------------
+/src/404.php                                          10      0
+/src/archive-item.php                                 12      0
+/src/footer.php                                       21      2
+/src/functions.php                                    768     147
+/src/header.php                                       55      0
+/src/index.php                                        6       0
+/src/page-create-loan.php                             67      5
+/src/page-item-overview.php                           13      0
+/src/page-loan-overview.php                           21      0
+/src/page-loaner-overview.php                         13      0
+/src/single-item.php                                  29      3
+/src/single-loan.php                                  64      3
+/src/single-loaner.php                                126     16
+/src/inc/loans/loan-create-handler.php                380     5
+/src/inc/loans/loan-queries.php                       199     5
+/src/inc/loans/loan-return-handler.php                113     1
+/src/template-parts/items/item-info-modal.php         28      3
+/src/template-parts/items/item-info-trigger.php       185     10
+/src/template-parts/items/item-list.php               293     18
+/src/template-parts/items/item-preview.php            418     26
+/src/template-parts/loaners/loaner-list-row.php       21      0
+/src/template-parts/loaners/loaner-list.php           61      3
+/src/template-parts/loans/form-loan-meta.php          118     2
+/src/template-parts/loans/form-loan.php               20      0
+/src/template-parts/loans/item-list.php               401     19
+/src/template-parts/loans/loan-item-row.php           46      0
+/src/template-parts/loans/loan-list-row.php           37      6
+/src/template-parts/loans/loan-list.php               91      5
+/src/template-parts/loans/loan-single-card.php        386     26
+/src/template-parts/loans/login-part.php              18      4
+/src/template-parts/loans/login-status.php            15      0
+/src/template-parts/ui/filter-input.php               31      3
+/src/template-parts/ui/filter-tags.php                322     25
+/src/template-parts/ui/login-mask.php                 72      6
+----------------------------------------------------------------------
+A TOTAL OF 4460 ERRORS AND 343 WARNINGS WERE FOUND IN 34 FILES
+----------------------------------------------------------------------
+PHPCBF CAN FIX 4580 OF THESE SNIFF VIOLATIONS AUTOMATICALLY
+----------------------------------------------------------------------
+
+Time: 3.34 secs; Memory: 22MB
+

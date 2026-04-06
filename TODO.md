@@ -1,0 +1,2 @@
+- tags need to filter as "and" and not as "or"
+- show nearly created loan

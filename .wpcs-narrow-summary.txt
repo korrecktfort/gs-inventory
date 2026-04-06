@@ -1,0 +1,18 @@
+
+PHP CODE SNIFFER REPORT SUMMARY
+----------------------------------------------------------------------
+FILE                                                  ERRORS  WARNINGS
+----------------------------------------------------------------------
+/src/404.php                                          1       0
+/src/functions.php                                    38      5
+/src/single-loan.php                                  4       0
+/src/inc/loans/loan-create-handler.php                8       0
+/src/inc/loans/loan-return-handler.php                4       0
+/src/template-parts/loans/loan-item-row.php           1       0
+/src/template-parts/loans/login-status.php            1       0
+----------------------------------------------------------------------
+A TOTAL OF 57 ERRORS AND 5 WARNINGS WERE FOUND IN 7 FILES
+----------------------------------------------------------------------
+
+Time: 1.17 secs; Memory: 18MB
+
