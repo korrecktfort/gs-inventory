@@ -39,6 +39,13 @@ $loan_id = get_the_ID();
 <main class="loan-single-page">
 	<div class="loan-single-inner">
 
+<?php $loan_created = (int) ( filter_input( INPUT_GET, 'loan_created', FILTER_VALIDATE_INT ) ?: 0 ); ?>
+<?php if ( $loan_created === 1 ) : ?>
+	<p class="loan-single-notice" role="status" aria-live="polite">
+		Loan created successfully!
+	</p>
+<?php endif; ?>
+
 <?php $loan_returned = (int) ( filter_input( INPUT_GET, 'loan_returned', FILTER_VALIDATE_INT ) ?: 0 ); ?>
 <?php if ( $loan_returned === 1 ) : ?>
 	<p class="loan-single-notice">Loan returned successfully.</p>

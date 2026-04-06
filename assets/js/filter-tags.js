@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.warn('Failed to parse tags:', e);
             }
 
-            const matches = selectedTermValues.length === 0 || selectedTermValues.some(termValue => itemTerms.includes(termValue));
+            const matches = selectedTermValues.length === 0 || selectedTermValues.every(termValue => itemTerms.includes(termValue));
             item.style.display = matches ? '' : 'none';
         });
 
