@@ -68,6 +68,9 @@ function gs_register_theme_menus() {
 }
 add_action('after_setup_theme', 'gs_register_theme_menus');
 
+// Hide the frontend admin toolbar for all logged-in users.
+add_filter('show_admin_bar', '__return_false');
+
 function register_item_post_type() {
     $labels = [
         'name' => 'Items',
