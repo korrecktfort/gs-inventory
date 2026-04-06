@@ -92,6 +92,13 @@ document.addEventListener('click', function (event) {
         }
 
         modal.hidden = false;
+
+        if (typeof window.gsInitItemImageZoom === 'function') {
+            window.requestAnimationFrame(function () {
+                window.gsInitItemImageZoom();
+            });
+        }
+
         return;
     }
 

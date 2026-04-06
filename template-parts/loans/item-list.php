@@ -153,25 +153,27 @@ $loanedQuantities = gs_get_loaned_quantities_map();
         <?php get_template_part( 'template-parts/items/item-info', 'trigger', ['item_id' => $id] ); ?>
     </div>
 
-    <!-- Display Availability -->
-    <div class="item-availability column">        
-        <p class="item-availability-value"><?php echo esc_html($available) . "/" . esc_html($stock_total); ?></p>
-    </div>
+    <div class="item-row-controls">
+        <!-- Display Availability -->
+        <div class="item-availability column">        
+            <p class="item-availability-value"><?php echo esc_html($available) . "/" . esc_html($stock_total); ?></p>
+        </div>
 
-    <!-- Assign Quantity To Loan -->
-    <div class="item-quantity column">
-        <button type="button" class="qty-btn qty-reset ui-button">--</button>
-        <button type="button" class="qty-btn qty-minus ui-button">-</button>
-        <input 
-        class = "qty-input ui-input"
-        type="number"
-        name="loan_items[<?php echo $id_escaped; ?>][quantity]"
-        min="0"
-        max="<?php echo esc_attr($available); ?>"
-        value="0"        
-        >
-        <button type="button" class="qty-btn qty-plus ui-button">+</button>
-        <button type="button" class="qty-btn qty-max ui-button">++</button>
+        <!-- Assign Quantity To Loan -->
+        <div class="item-quantity column">
+            <button type="button" class="qty-btn qty-reset ui-button">--</button>
+            <button type="button" class="qty-btn qty-minus ui-button">-</button>
+            <input 
+            class = "qty-input ui-input"
+            type="number"
+            name="loan_items[<?php echo $id_escaped; ?>][quantity]"
+            min="0"
+            max="<?php echo esc_attr($available); ?>"
+            value="0"        
+            >
+            <button type="button" class="qty-btn qty-plus ui-button">+</button>
+            <button type="button" class="qty-btn qty-max ui-button">++</button>
+        </div>
     </div>
 
 </div>

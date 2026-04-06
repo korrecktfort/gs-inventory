@@ -204,16 +204,21 @@ $article_class = trim('loan-single-card ' . $root_class);
                 aria-label="Enter the 3-digit confirmation code"
                 data-expected="<?php echo esc_attr($return_guard_code); ?>"
             >
-            <button
-                type="submit"
-                name="return_loan_submit"
-                value="1"
-                class="ui-button"
-                id="<?php echo esc_attr($submit_button_id); ?>"
-                disabled
-            >
-                Mark as returned
-            </button>
+            <div class="loan-single-return-action">
+                <button
+                    type="submit"
+                    name="return_loan_submit"
+                    value="1"
+                    class="ui-button"
+                    id="<?php echo esc_attr($submit_button_id); ?>"
+                    disabled
+                >
+                    Mark as returned
+                </button>
+                <p class="loan-single-return-hint" hidden>
+                    Enter the 3-digit code first to unlock this button.
+                </p>
+            </div>
         </div>
     </form>
 

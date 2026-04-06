@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.loan-single-card[data-guard-input-id][data-submit-id]').forEach(function (card) {
         const guardInput = document.getElementById(card.dataset.guardInputId);
         const submitButton = document.getElementById(card.dataset.submitId);
+        const actionWrap = submitButton ? submitButton.closest('.loan-single-return-action') : null;
+        const hint = actionWrap ? actionWrap.querySelector('.loan-single-return-hint') : null;
 
         if (!guardInput || !submitButton) {
             return;
@@ -12,7 +14,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function updateReturnButtonState() {
             const entered = (guardInput.value || '').trim();
-            submitButton.disabled = entered !== expected;
+            const isUnlocked = entered === expected;
+
+            submitButton.disabled = isUnlocked !== true;
+
+            if (hint) {
+                hint.hidden = true;
+            }
+        }
+
+        if (actionWrap && hint) {
+            actionWrap.addEventListener('click', function () {
+                if (submitButton.disabled !== true) {
+                    return;
+                }
+
+                hint.hidden = false;
+            });
         }
 
         guardInput.addEventListener('input', updateReturnButtonState);

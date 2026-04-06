@@ -80,6 +80,19 @@
         wrap.style.removeProperty('--item-image-origin-y');
     }
 
+    function refreshWrapState(wrap, img) {
+        var metrics = getZoomMetrics(wrap, img);
+
+        if (!metrics) {
+            resetWrap(wrap);
+            return null;
+        }
+
+        wrap.classList.add('is-zoomable');
+        wrap.style.setProperty('--item-image-zoom-scale', metrics.zoomScale.toFixed(3));
+        return metrics;
+    }
+
     function bindZoom(wrap) {
         if (!wrap || wrap.dataset.zoomBound === '1') {
             return;
@@ -98,16 +111,13 @@
                 return;
             }
 
-            var metrics = getZoomMetrics(wrap, img);
+            var metrics = refreshWrapState(wrap, img);
 
             if (!metrics) {
-                resetWrap(wrap);
                 return;
             }
 
-            wrap.classList.add('is-zoomable');
             wrap.classList.add('is-zoom-active');
-            wrap.style.setProperty('--item-image-zoom-scale', metrics.zoomScale.toFixed(3));
             applyPointerOrigin(wrap, metrics, event);
         }
 
@@ -116,10 +126,9 @@
                 return;
             }
 
-            var metrics = getZoomMetrics(wrap, img);
+            var metrics = refreshWrapState(wrap, img);
 
             if (!metrics) {
-                resetWrap(wrap);
                 return;
             }
 
@@ -133,13 +142,7 @@
         }
 
         function onImageLoad() {
-            if (!wrap.classList.contains('is-zoom-active')) {
-                var metrics = getZoomMetrics(wrap, img);
-                if (!metrics) {
-                    wrap.classList.remove('is-zoomable');
-                    wrap.style.removeProperty('--item-image-zoom-scale');
-                }
-            }
+            refreshWrapState(wrap, img);
         }
 
         wrap.addEventListener('mouseenter', onEnter);
@@ -152,6 +155,8 @@
         var wraps = document.querySelectorAll('.item-preview-image-wrap');
         wraps.forEach(bindZoom);
     }
+
+    window.gsInitItemImageZoom = initAll;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initAll);
