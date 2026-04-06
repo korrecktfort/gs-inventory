@@ -4,7 +4,10 @@
     }
     window.__gsItemImageZoomInitialized = true;
 
-    var supportsHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    var supportsHover = window.matchMedia && (
+        window.matchMedia('(any-hover: hover)').matches ||
+        window.matchMedia('(hover: hover)').matches
+    );
 
     if (!supportsHover) {
         return;
@@ -26,14 +29,22 @@
 
         var fitScale = Math.min(containerWidth / naturalWidth, containerHeight / naturalHeight);
 
-        if (fitScale >= 1) {
-            return null;
-        }
-
         var renderWidth = naturalWidth * fitScale;
         var renderHeight = naturalHeight * fitScale;
         var offsetX = (containerWidth - renderWidth) / 2;
         var offsetY = (containerHeight - renderHeight) / 2;
+
+        if (fitScale >= 1) {
+            return {
+                containerWidth: containerWidth,
+                containerHeight: containerHeight,
+                renderWidth: containerWidth,
+                renderHeight: containerHeight,
+                offsetX: 0,
+                offsetY: 0,
+                zoomScale: 1.6
+            };
+        }
 
         return {
             containerWidth: containerWidth,

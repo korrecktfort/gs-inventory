@@ -476,6 +476,17 @@ h3 {
 }
 
 @media (max-width: 768px) {
+    .item-list-toolbar-row {
+        flex-wrap: wrap;
+    }
+
+    .item-list-toolbar-section,
+    .item-list-toolbar-section.item-list-toolbar-search,
+    .item-list-toolbar-section.item-list-toolbar-tags {
+        min-width: 0;
+        flex: 1 1 100%;
+    }
+
     .item-row {
         align-items: center;
         flex-wrap: nowrap;
@@ -719,9 +730,26 @@ body{
 }
 
 @media (max-width: 768px) {
+    :root {
+        --font-size-base: 18px;
+        --font-size-h1: 1.8rem;
+        --font-size-h2: 1.35rem;
+        --font-size-h3: 1.15rem;
+        --pill-font-size: 0.82rem;
+    }
+
     body {
         margin-left: 16px;
         margin-right: 16px;
+    }
+
+    .ui-input,
+    .ui-button {
+        font-size: 0.95rem;
+    }
+
+    .ui-input {
+        padding: 0.35rem 0.45rem;
     }
 
     .gs-menu-toggle {
@@ -1804,6 +1832,50 @@ input.ui-input[required]:valid,
     color: #78350f;
 }
 
+@media (max-width: 768px) {
+    .loan-form,
+    .loan-title-field,
+    .loaner-main,
+    .loan-meta,
+    .loan-summary {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .loan-meta {
+        grid-template-columns: 1fr;
+        gap: 0.55rem;
+    }
+
+    .loan-form {
+        display: block;
+        gap: 0.85rem;
+    }
+
+    .loan-form > * {
+        min-width: 0;
+    }
+
+    .loan-form > * + * {
+        margin-top: 0.85rem;
+    }
+
+    .loan-form-submit {
+        justify-items: stretch;
+    }
+
+    .loan-form .btn-submit {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .loan-form .loaner-info-actions .ui-button,
+    .loan-form .loaner-info-editor-actions .ui-button {
+        flex: 1 1 auto;
+    }
+}
+
 @media (max-width: 640px) {
     body {
         margin-left: 16px;
@@ -1824,5 +1896,104 @@ input.ui-input[required]:valid,
 
     .loan-single-card {
         padding: 0.6rem;
+    }
+}
+
+@media (max-width: 360px) {
+    :root {
+        --font-size-base: 18px;
+        --font-size-h1: 1.65rem;
+        --font-size-h2: 1.3rem;
+        --font-size-h3: 1.1rem;
+        --pill-font-size: 0.82rem;
+    }
+
+    body {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .gs-site-header {
+        padding: 0.6rem 0.7rem;
+    }
+
+    .item-list-toolbar,
+    .loan-list-toolbar,
+    .loaner-overview-toolbar {
+        padding: 0.4rem 0.4rem 0;
+    }
+
+    .item-list-toolbar-row {
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .item-list-toolbar-section,
+    .item-list-toolbar-section.item-list-toolbar-search,
+    .item-list-toolbar-section.item-list-toolbar-tags {
+        min-width: 0;
+        flex: 1 1 100%;
+    }
+
+    .item-row {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 0.35rem;
+    }
+
+    .item-quantity {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 0.2rem;
+    }
+
+    .gs-menu-toggle,
+    .filter-input-clear,
+    .loaner-toggle,
+    .item-modal-close {
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    .item-quantity .qty-btn,
+    .qty-btn {
+        min-width: 2rem;
+        min-height: 2rem;
+    }
+
+    .item-quantity .qty-btn {
+        font-size: 0.86rem;
+    }
+
+    .item-quantity .qty-input,
+    .qty-input {
+        width: 2.4rem;
+        font-size: 0.86rem;
+    }
+
+    .loan-single-meta-item .ui-label {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .loan-single-return-guard-input {
+        width: 100%;
+    }
+
+    .loaner-history-row {
+        grid-template-columns: 1fr;
+        gap: 0.3rem;
+    }
+
+    .loaner-history-link {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+    }
+
+    .item-modal-dialog {
+        width: calc(100vw - 20px);
+        margin: 5vh auto;
+        padding: 0.6rem 0.65rem;
     }
 }
