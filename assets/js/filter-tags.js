@@ -22,6 +22,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     let selectedTags = [];
+    let defaultSelectedTerms = [];
+
+    try {
+        const parsedDefaults = JSON.parse(filterRoot.dataset.defaultSelectedTerms || '[]');
+        defaultSelectedTerms = Array.isArray(parsedDefaults) ? parsedDefaults.map(String) : [];
+    } catch (e) {
+        console.warn('Failed to parse default selected terms:', e);
+    }
 
     function getTagOptions() {
         return tagsList.querySelectorAll('.filter-tags-option');
@@ -46,6 +54,15 @@ document.addEventListener('DOMContentLoaded', function () {
             button.className = 'filter-tags-option';
             button.textContent = term.name;
             button.dataset.termValue = term.value;
+
+            if (term.taxonomy === 'custom') {
+                button.classList.add('filter-tags-option--system');
+            } else if (term.taxonomy === 'storage_locations') {
+                button.classList.add('filter-tags-option--storage');
+            } else if (term.taxonomy === 'item_tag') {
+                button.classList.add('filter-tags-option--item-tag');
+            }
+
             button.addEventListener('click', () => selectTag(term.value, term.name));
             tagsList.appendChild(button);
         });
@@ -63,10 +80,19 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    function getTermTaxonomy(termValue) {
+        const match = allTerms.find((candidate) => String(candidate.value) === String(termValue));
+        return match ? String(match.taxonomy || '') : '';
+    }
+
     function selectTag(termValue, termName) {
         if (selectedTags.some(t => t.value === termValue)) return;
 
-        selectedTags.push({ value: termValue, name: termName });
+        selectedTags.push({
+            value: termValue,
+            name: termName,
+            taxonomy: getTermTaxonomy(termValue),
+        });
         renderSelectedTags();
         applyFilter();
         renderTagOptions();
@@ -115,6 +141,27 @@ document.addEventListener('DOMContentLoaded', function () {
         selectedTags.forEach((tag) => {
             const pill = document.createElement('div');
             pill.className = 'filter-tags-pill';
+            pill.setAttribute('role', 'button');
+            pill.setAttribute('tabindex', '0');
+            pill.setAttribute('aria-label', 'Remove ' + tag.name);
+
+            const handleRemove = () => removeTag(tag.value);
+
+            pill.addEventListener('click', handleRemove);
+            pill.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleRemove();
+                }
+            });
+
+            if (tag.taxonomy === 'custom') {
+                pill.classList.add('filter-tags-pill--system');
+            } else if (tag.taxonomy === 'storage_locations') {
+                pill.classList.add('filter-tags-pill--storage');
+            } else if (tag.taxonomy === 'item_tag') {
+                pill.classList.add('filter-tags-pill--item-tag');
+            }
 
             const name = document.createElement('span');
             name.className = 'filter-tags-pill-name';
@@ -126,7 +173,13 @@ document.addEventListener('DOMContentLoaded', function () {
             removeBtn.className = 'filter-tags-pill-remove ui-button';
             removeBtn.innerHTML = '×';
             removeBtn.setAttribute('aria-label', 'Remove ' + tag.name);
-            removeBtn.addEventListener('click', () => removeTag(tag.value));
+            removeBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                handleRemove();
+            });
+            removeBtn.addEventListener('keydown', (event) => {
+                event.stopPropagation();
+            });
             pill.appendChild(removeBtn);
 
             selectedContainer.appendChild(pill);
@@ -165,8 +218,24 @@ document.addEventListener('DOMContentLoaded', function () {
         target.dispatchEvent(new CustomEvent('gs:filter-updated', { bubbles: true }));
     }
 
+    defaultSelectedTerms.forEach((defaultValue) => {
+        const term = allTerms.find((candidate) => String(candidate.value) === defaultValue);
+
+        if (!term) {
+            return;
+        }
+
+        selectedTags.push({
+            value: String(term.value),
+            name: String(term.name),
+            taxonomy: String(term.taxonomy || ''),
+        });
+    });
+
     renderTagOptions();
+    filterTagOptions();
     renderSelectedTags();
+    applyFilter();
     closeList();
 
     toggleButton.addEventListener('click', () => {

@@ -2,7 +2,12 @@
 /* Template Name: Item Overview */
 
 if (!is_user_logged_in()) {
-    auth_redirect();
+	get_header();
+	get_template_part('template-parts/ui/login-mask', null, [
+		'title' => get_the_title() ?: 'Item Overview',
+	]);
+	get_footer();
+	return;
 }
 
 get_header();

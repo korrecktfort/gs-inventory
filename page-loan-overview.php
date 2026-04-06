@@ -1,9 +1,14 @@
 <?php 
     /* Template Name: Loan Overview */
-    
-    if(!is_user_logged_in()) {
-        auth_redirect();
-    }
+
+if (!is_user_logged_in()) {
+    get_header();
+    get_template_part('template-parts/ui/login-mask', null, [
+        'title' => get_the_title() ?: 'Loan Overview',
+    ]);
+    get_footer();
+    return;
+}
 
 get_header();
 

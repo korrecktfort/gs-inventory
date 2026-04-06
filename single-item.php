@@ -1,4 +1,13 @@
 <?php
+if (!is_user_logged_in()) {
+	get_header();
+	get_template_part('template-parts/ui/login-mask', null, [
+		'title' => get_the_title() ?: 'Item',
+	]);
+	get_footer();
+	return;
+}
+
 get_header();
 ?>
 

@@ -2,7 +2,12 @@
 /* Template Name: Create Loan */
 
 if (!is_user_logged_in()) {
-    auth_redirect();
+    get_header();
+    get_template_part('template-parts/ui/login-mask', null, [
+        'title' => get_the_title() ?: 'Create Loan',
+    ]);
+    get_footer();
+    return;
 }
 
 require_once get_template_directory() . '/inc/loans/loan-create-handler.php';

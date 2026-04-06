@@ -33,6 +33,11 @@ body {
     color: var(--color-text);
 }
 
+html,
+body {
+    min-height: 100%;
+}
+
 button, input, select, textarea {
     font-family: var(--font);
     font-size: 1rem;
@@ -916,6 +921,9 @@ body {
     margin: 0 auto;
     max-width: 800px;
     padding-inline: clamp(10px, 4vw, 120px);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .gs-site-header {
@@ -930,6 +938,38 @@ body {
 .ui-label {
     display: block;
     margin-bottom: 0.35rem;
+}
+
+.gs-login-mask-page {
+    padding: 1rem 0;
+}
+
+.gs-login-mask {
+    max-width: 420px;
+    margin: 0 auto;
+    background: var(--color-surface);
+    padding: 0.85rem;
+}
+
+.gs-login-mask-title {
+    margin: 0 0 0.35rem;
+}
+
+.gs-login-mask-text {
+    margin: 0 0 0.55rem;
+    color: var(--color-muted);
+}
+
+.gs-login-mask .login-username,
+.gs-login-mask .login-password,
+.gs-login-mask .login-remember,
+.gs-login-mask .login-submit {
+    margin: 0 0 0.45rem;
+}
+
+.gs-login-mask .input {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .ui-input {
@@ -1922,6 +1962,21 @@ input.ui-input[required]:valid,
     color: var(--color-text);
 }
 
+.filter-tags-option--system {
+    background: #dbeafe;
+    color: #1e3a8a;
+}
+
+.filter-tags-option--storage {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.filter-tags-option--item-tag {
+    background: #fef3c7;
+    color: #78350f;
+}
+
 .filter-tags-option:last-child {
     border-bottom: 0;
 }
@@ -1953,6 +2008,31 @@ input.ui-input[required]:valid,
     border-radius: 999px;
     font-size: var(--pill-font-size);
     max-width: 100%;
+    cursor: pointer;
+}
+
+.filter-tags-pill:hover,
+.filter-tags-pill:focus-visible {
+    outline: 2px solid var(--color-border-dark);
+    outline-offset: 1px;
+}
+
+.filter-tags-pill--system {
+    border-color: #1d4ed8;
+    background: #dbeafe;
+    color: #1e3a8a;
+}
+
+.filter-tags-pill--storage {
+    border-color: #6b7280;
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.filter-tags-pill--item-tag {
+    border-color: #a16207;
+    background: #fef3c7;
+    color: #78350f;
 }
 
 .filter-tags-pill-name {
@@ -1982,6 +2062,17 @@ input.ui-input[required]:valid,
     color: var(--color-accent);
 }
 
+@media (max-width: 768px) {
+    .filter-tags-pill {
+        padding: 0.12rem 0.68rem;
+    }
+
+    .filter-tags-pill-remove {
+        width: 1.35rem;
+        height: 1.35rem;
+    }
+}
+
 .filter-tags-clear-all {
     display: inline-flex;
     align-items: center;
@@ -2001,5 +2092,34 @@ input.ui-input[required]:valid,
     border-color: #92400e;
     background: #fde68a;
     color: #78350f;
+}
+
+.gs-site-footer {
+    margin: auto 0 0;
+    border-top: 1px solid var(--color-border-50);
+    background: var(--color-surface);
+}
+
+.gs-site-footer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+}
+
+.gs-footer-link {
+    text-transform: lowercase;
+    min-width: 6rem;
+}
+
+@media (max-width: 768px) {
+    .gs-site-footer-bar {
+        padding: 0.55rem 0.75rem;
+    }
+
+    .gs-footer-link {
+        min-width: 5.25rem;
+    }
 }
 

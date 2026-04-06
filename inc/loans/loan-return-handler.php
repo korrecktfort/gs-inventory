@@ -11,6 +11,13 @@ if (!function_exists('gs_handle_return_loan')) {
             return [];
         }
 
+        if (!is_user_logged_in() || !current_user_can('read')) {
+            return [
+                'success' => false,
+                'message' => 'You need to be logged in to return a loan.',
+            ];
+        }
+
         if (
             empty($_POST['return_loan_nonce']) ||
             !wp_verify_nonce($_POST['return_loan_nonce'], 'return_loan_action')

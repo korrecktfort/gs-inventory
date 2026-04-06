@@ -36,6 +36,13 @@ $loanedQuantities = gs_get_loaned_quantities_map();
                     'item_selector' => '.item-row',
                     'tags_attribute' => 'data-item-filter-terms',
                     'taxonomies' => ['item_tag', 'storage_locations'],
+                    'custom_terms' => [
+                        [
+                            'value' => 'meta:available',
+                            'name' => 'Available',
+                        ],
+                    ],
+                    'default_selected_terms' => ['meta:available'],
                 ]); ?>
             </div>
         </div>
@@ -139,6 +146,10 @@ $loanedQuantities = gs_get_loaned_quantities_map();
             if ($storage_id > 0) {
                 $filter_terms[] = 'storage_locations:' . $storage_id;
             }
+        }
+
+        if ($available > 0) {
+            $filter_terms[] = 'meta:available';
         }
 
         $filter_terms = array_values(array_unique($filter_terms));

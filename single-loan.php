@@ -1,4 +1,13 @@
 <?php 
+if (!is_user_logged_in()) {
+    get_header();
+    get_template_part('template-parts/ui/login-mask', null, [
+        'title' => get_the_title() ?: 'Loan',
+    ]);
+    get_footer();
+    return;
+}
+
 require_once get_template_directory() . '/inc/loans/loan-return-handler.php';
 
 $return_result = gs_handle_return_loan();
