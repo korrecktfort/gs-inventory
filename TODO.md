@@ -1,2 +1,1 @@
-- tags need to filter as "and" and not as "or"
-- show nearly created loan
+- UPDATE LOAN: make a loan "updateable", filling it into the create loan form to change data.
