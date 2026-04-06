@@ -13,7 +13,7 @@ require_once get_template_directory() . '/inc/loans/loan-return-handler.php';
 $return_result = gs_handle_return_loan();
 
 if (!empty($return_result['success']) && !empty($return_result['loan_id'])) {
-    wp_redirect(add_query_arg([
+    wp_safe_redirect(add_query_arg([
         'loan_returned' => 1,
     ], get_permalink($return_result['loan_id'])));
     exit;
@@ -30,7 +30,8 @@ $loan_id = get_the_ID();
 <main class="loan-single-page">
     <div class="loan-single-inner">
 
-<?php if (!empty($_GET['loan_returned'])) : ?>
+<?php $loan_returned = (int) (filter_input(INPUT_GET, 'loan_returned', FILTER_VALIDATE_INT) ?: 0); ?>
+<?php if ($loan_returned === 1) : ?>
     <p class="loan-single-notice">Loan returned successfully.</p>
 <?php endif; ?>
 

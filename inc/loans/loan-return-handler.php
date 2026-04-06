@@ -3,7 +3,11 @@
 if (!function_exists('gs_handle_return_loan')) {
     function gs_handle_return_loan(): array
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $request_method = isset($_SERVER['REQUEST_METHOD'])
+            ? sanitize_text_field(wp_unslash((string) $_SERVER['REQUEST_METHOD']))
+            : 'GET';
+
+        if (strtoupper($request_method) !== 'POST') {
             return [];
         }
 
@@ -11,16 +15,20 @@ if (!function_exists('gs_handle_return_loan')) {
             return [];
         }
 
-        if (!is_user_logged_in() || !current_user_can('read')) {
+        if (!function_exists('gs_can_manage_inventory') || !gs_can_manage_inventory()) {
             return [
                 'success' => false,
                 'message' => 'You need to be logged in to return a loan.',
             ];
         }
 
+        $nonce = isset($_POST['return_loan_nonce'])
+            ? sanitize_text_field(wp_unslash((string) $_POST['return_loan_nonce']))
+            : '';
+
         if (
-            empty($_POST['return_loan_nonce']) ||
-            !wp_verify_nonce($_POST['return_loan_nonce'], 'return_loan_action')
+            $nonce === '' ||
+            !wp_verify_nonce($nonce, 'return_loan_action')
         ) {
             return [
                 'success' => false,

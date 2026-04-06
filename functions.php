@@ -104,10 +104,16 @@ function gs_login_rate_limit_max_attempts(): int {
 }
 
 function gs_login_rate_limit_client_ip(): string {
-    $remote_addr = isset($_SERVER['REMOTE_ADDR']) ? (string) wp_unslash($_SERVER['REMOTE_ADDR']) : '';
+    $remote_addr = isset($_SERVER['REMOTE_ADDR'])
+        ? sanitize_text_field(wp_unslash((string) $_SERVER['REMOTE_ADDR']))
+        : '';
     $client_ip = filter_var($remote_addr, FILTER_VALIDATE_IP);
 
     return $client_ip ? $client_ip : 'unknown';
+}
+
+function gs_can_manage_inventory(): bool {
+    return is_user_logged_in() && current_user_can('edit_posts');
 }
 
 function gs_login_rate_limit_key(string $username, string $ip): string {
@@ -416,7 +422,7 @@ function register_loan_item_post_type() {
 add_action('init', 'register_loan_item_post_type');
 
 function gs_update_loaner_info_ajax() {
-    if (!is_user_logged_in() || !current_user_can('read')) {
+    if (!gs_can_manage_inventory()) {
         wp_send_json_error([
             'message' => 'You are not allowed to do this.',
         ], 403);
@@ -447,7 +453,7 @@ function gs_update_loaner_info_ajax() {
 add_action('wp_ajax_gs_update_loaner_info', 'gs_update_loaner_info_ajax');
 
 function gs_create_loaner_ajax() {
-    if (!is_user_logged_in() || !current_user_can('read')) {
+    if (!gs_can_manage_inventory()) {
         wp_send_json_error([
             'message' => 'You are not allowed to do this.',
         ], 403);

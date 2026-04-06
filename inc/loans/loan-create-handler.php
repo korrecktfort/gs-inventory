@@ -3,7 +3,11 @@
 if (!function_exists('gs_handle_create_loan')) {
     function gs_handle_create_loan(): array
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $request_method = isset($_SERVER['REQUEST_METHOD'])
+            ? sanitize_text_field(wp_unslash((string) $_SERVER['REQUEST_METHOD']))
+            : 'GET';
+
+        if (strtoupper($request_method) !== 'POST') {
             return [];
         }
 
@@ -22,7 +26,7 @@ if (!function_exists('gs_handle_create_loan')) {
             ];
         }
 
-        if (!is_user_logged_in() || !current_user_can('read')) {
+        if (!function_exists('gs_can_manage_inventory') || !gs_can_manage_inventory()) {
             return [
                 'success' => false,
                 'message' => 'You need to be logged in to create a loan.',
@@ -40,7 +44,21 @@ if (!function_exists('gs_handle_create_loan')) {
         $loan_due_date = sanitize_text_field(wp_unslash((string) ($_POST['due_date'] ?? '')));
         $current_user_id = get_current_user_id();
 
-        $loan_items  = isset($_POST['loan_items']) && is_array($_POST['loan_items']) ? $_POST['loan_items'] : [];
+        $loan_items = [];
+
+        $raw_loan_items = filter_input(INPUT_POST, 'loan_items', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
+
+        if (is_array($raw_loan_items)) {
+            foreach (wp_unslash($raw_loan_items) as $item_id => $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+
+                $loan_items[(int) $item_id] = [
+                    'quantity' => isset($row['quantity']) ? (int) $row['quantity'] : 0,
+                ];
+            }
+        }
 
         if ($current_user_id <= 0) {
             return [
