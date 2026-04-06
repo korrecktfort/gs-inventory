@@ -18,7 +18,7 @@ $items = get_posts([
                         'placeholder' => 'Search items...',
                         'target' => '#item-list-overview',
                         'item_selector' => '.item-overview-row',
-                        'text_selector' => '.item-preview-title',
+                        'text_selector' => '.item-info-trigger-label',
                     ]); ?>
                 </div>
 
@@ -134,7 +134,7 @@ $items = get_posts([
                             <?php get_template_part('template-parts/items/item', 'preview', [
                                 'item_id' => $item->ID,
                                 'title_tag' => 'h2',
-                                'title_url' => get_permalink($item->ID),
+                                'title_modal_trigger' => true,
                                 'description_source' => 'excerpt',
                                 'show_image' => false,
                                 'root_class' => 'item-preview--list',

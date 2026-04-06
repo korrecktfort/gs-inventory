@@ -6,7 +6,9 @@ if (!$item_id) {
 }
 
 $item_name = get_the_title($item_id);
-$stock_total = (int) get_field('stock_total', $item_id);
+$availability_text = function_exists('gs_get_item_availability_pill_text')
+    ? gs_get_item_availability_pill_text($item_id)
+    : '0/0';
 
 $image_url = '';
 $image_alt = '';
@@ -94,7 +96,7 @@ $tag_names = array_values(array_unique($tag_names));
     class="open-item-modal item-info-trigger ui-button"
     data-item-id="<?php echo esc_attr($item_id); ?>"
     data-item-name="<?php echo esc_attr($item_name); ?>"
-    data-item-stock="<?php echo esc_attr($stock_total); ?>"
+    data-item-stock="<?php echo esc_attr($availability_text); ?>"
     data-item-condition="<?php echo esc_attr($condition_name); ?>"
     data-item-tags="<?php echo esc_attr(wp_json_encode($tag_names)); ?>"
     data-item-image="<?php echo esc_url($image_url); ?>"

@@ -17,6 +17,30 @@ function gs_asset_version(string $relative_path): ?string {
     return (string) filemtime($asset_path);
 }
 
+function gs_get_item_availability_pill_text(int $item_id): string {
+    if ($item_id <= 0) {
+        return '0/0';
+    }
+
+    static $loaned_quantities = null;
+
+    if (!is_array($loaned_quantities)) {
+        if (!function_exists('gs_get_loaned_quantities_map')) {
+            require_once get_template_directory() . '/inc/loans/loan-queries.php';
+        }
+
+        $loaned_quantities = function_exists('gs_get_loaned_quantities_map')
+            ? gs_get_loaned_quantities_map()
+            : [];
+    }
+
+    $stock_total = (int) get_field('stock_total', $item_id);
+    $loaned = (int) ($loaned_quantities[$item_id] ?? 0);
+    $available = max(0, $stock_total - $loaned);
+
+    return sprintf('%d/%d', $available, $stock_total);
+}
+
 function enqueue_style(){
     $style_version = gs_asset_version('style.css');
 
@@ -70,6 +94,73 @@ add_action('after_setup_theme', 'gs_register_theme_menus');
 
 // Hide the frontend admin toolbar for all logged-in users.
 add_filter('show_admin_bar', '__return_false');
+
+function gs_login_rate_limit_window_seconds(): int {
+    return 15 * MINUTE_IN_SECONDS;
+}
+
+function gs_login_rate_limit_max_attempts(): int {
+    return 5;
+}
+
+function gs_login_rate_limit_client_ip(): string {
+    $remote_addr = isset($_SERVER['REMOTE_ADDR']) ? (string) wp_unslash($_SERVER['REMOTE_ADDR']) : '';
+    $client_ip = filter_var($remote_addr, FILTER_VALIDATE_IP);
+
+    return $client_ip ? $client_ip : 'unknown';
+}
+
+function gs_login_rate_limit_key(string $username, string $ip): string {
+    return 'gs_login_attempts_' . md5(strtolower($username) . '|' . $ip);
+}
+
+function gs_login_rate_limit_normalize_username(string $username): string {
+    $normalized = sanitize_user($username, true);
+    return $normalized !== '' ? $normalized : 'unknown';
+}
+
+function gs_login_rate_limit_authenticate($user, $username, $password) {
+    if ($user instanceof WP_User) {
+        return $user;
+    }
+
+    $normalized_username = gs_login_rate_limit_normalize_username((string) $username);
+    $ip = gs_login_rate_limit_client_ip();
+    $attempt_key = gs_login_rate_limit_key($normalized_username, $ip);
+    $attempt_count = (int) get_transient($attempt_key);
+
+    if ($attempt_count < gs_login_rate_limit_max_attempts()) {
+        return $user;
+    }
+
+    return new WP_Error(
+        'too_many_login_attempts',
+        sprintf(
+            'Too many login attempts. Please wait %d minutes and try again.',
+            (int) ceil(gs_login_rate_limit_window_seconds() / MINUTE_IN_SECONDS)
+        )
+    );
+}
+add_filter('authenticate', 'gs_login_rate_limit_authenticate', 30, 3);
+
+function gs_login_rate_limit_record_failure(string $username): void {
+    $normalized_username = gs_login_rate_limit_normalize_username($username);
+    $ip = gs_login_rate_limit_client_ip();
+    $attempt_key = gs_login_rate_limit_key($normalized_username, $ip);
+    $attempt_count = (int) get_transient($attempt_key);
+
+    set_transient($attempt_key, $attempt_count + 1, gs_login_rate_limit_window_seconds());
+}
+add_action('wp_login_failed', 'gs_login_rate_limit_record_failure');
+
+function gs_login_rate_limit_clear_on_success(string $user_login, WP_User $user): void {
+    $normalized_username = gs_login_rate_limit_normalize_username($user_login);
+    $ip = gs_login_rate_limit_client_ip();
+    $attempt_key = gs_login_rate_limit_key($normalized_username, $ip);
+
+    delete_transient($attempt_key);
+}
+add_action('wp_login', 'gs_login_rate_limit_clear_on_success', 10, 2);
 
 function register_item_post_type() {
     $labels = [

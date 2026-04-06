@@ -15,7 +15,7 @@ require_once get_template_directory() . '/inc/loans/loan-create-handler.php';
 $result = gs_handle_create_loan();
 
 if (!empty($result['success']) && !empty($result['loan_id'])) {
-    wp_redirect(add_query_arg([
+    wp_safe_redirect(add_query_arg([
         'loan_created' => 1,
         'loan_id' => $result['loan_id'],
     ], get_permalink()));

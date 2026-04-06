@@ -4,6 +4,11 @@ document.addEventListener('click', function (event) {
     const backdrop = event.target.closest('.item-modal-backdrop');
     const modal = document.getElementById('item-modal-trigger');
 
+    function setModalOpenState(isOpen) {
+        modal.hidden = !isOpen;
+        document.body.classList.toggle('item-modal-open', isOpen);
+    }
+
     if (!modal) {
         return;
     }
@@ -91,7 +96,7 @@ document.addEventListener('click', function (event) {
             }
         }
 
-        modal.hidden = false;
+        setModalOpenState(true);
 
         if (typeof window.gsInitItemImageZoom === 'function') {
             window.requestAnimationFrame(function () {
@@ -103,7 +108,7 @@ document.addEventListener('click', function (event) {
     }
 
     if (closeButton || backdrop) {
-        modal.hidden = true;
+        setModalOpenState(false);
     }
 });
 
@@ -116,5 +121,6 @@ document.addEventListener('keydown', function (event) {
 
     if (event.key === 'Escape') {
         modal.hidden = true;
+        document.body.classList.remove('item-modal-open');
     }
 });

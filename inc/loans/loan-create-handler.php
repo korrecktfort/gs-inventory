@@ -11,13 +11,21 @@ if (!function_exists('gs_handle_create_loan')) {
             return [];
         }
 
-        if (
-            empty($_POST['create_loan_nonce']) ||
-            !wp_verify_nonce($_POST['create_loan_nonce'], 'create_loan_action')
-        ) {
+        $nonce = isset($_POST['create_loan_nonce'])
+            ? sanitize_text_field(wp_unslash((string) $_POST['create_loan_nonce']))
+            : '';
+
+        if ($nonce === '' || !wp_verify_nonce($nonce, 'create_loan_action')) {
             return [
                 'success' => false,
                 'message' => 'Security check failed.',
+            ];
+        }
+
+        if (!is_user_logged_in() || !current_user_can('read')) {
+            return [
+                'success' => false,
+                'message' => 'You need to be logged in to create a loan.',
             ];
         }
 
@@ -25,14 +33,14 @@ if (!function_exists('gs_handle_create_loan')) {
             require_once get_template_directory() . '/inc/loans/loan-queries.php';
         }
 
-        $loan_title  = sanitize_text_field($_POST['loan_title'] ?? '');
+        $loan_title  = sanitize_text_field(wp_unslash((string) ($_POST['loan_title'] ?? '')));
         $loaner_id = isset($_POST['loaner_id']) ? (int) $_POST['loaner_id'] : 0;
-        $loan_status = sanitize_text_field($_POST['loan_status'] ?? 'active');
-        $loan_start_date = sanitize_text_field($_POST['start_date'] ?? '');
-        $loan_due_date = sanitize_text_field($_POST['due_date'] ?? '');
+        $loan_status = 'active';
+        $loan_start_date = sanitize_text_field(wp_unslash((string) ($_POST['start_date'] ?? '')));
+        $loan_due_date = sanitize_text_field(wp_unslash((string) ($_POST['due_date'] ?? '')));
         $current_user_id = get_current_user_id();
 
-        $loan_items  = $_POST['loan_items'] ?? [];
+        $loan_items  = isset($_POST['loan_items']) && is_array($_POST['loan_items']) ? $_POST['loan_items'] : [];
 
         if ($current_user_id <= 0) {
             return [
@@ -55,16 +63,36 @@ if (!function_exists('gs_handle_create_loan')) {
             ];
         }
 
-        if ($loan_start_date !== '' && $loan_due_date !== '') {
-            $start_timestamp = strtotime($loan_start_date);
-            $due_timestamp = strtotime($loan_due_date);
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $loan_start_date) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $loan_due_date)) {
+            return [
+                'success' => false,
+                'message' => 'Please provide valid start and due dates.',
+            ];
+        }
 
-            if ($start_timestamp !== false && $due_timestamp !== false && $due_timestamp < $start_timestamp) {
-                return [
-                    'success' => false,
-                    'message' => 'Due date cannot be earlier than start date.',
-                ];
-            }
+        $start_date_obj = DateTimeImmutable::createFromFormat('Y-m-d', $loan_start_date);
+        $due_date_obj = DateTimeImmutable::createFromFormat('Y-m-d', $loan_due_date);
+
+        if (!$start_date_obj || !$due_date_obj) {
+            return [
+                'success' => false,
+                'message' => 'Please provide valid start and due dates.',
+            ];
+        }
+
+        if ($due_date_obj < $start_date_obj) {
+            return [
+                'success' => false,
+                'message' => 'Due date cannot be earlier than start date.',
+            ];
+        }
+
+        $loaner_post = get_post($loaner_id);
+        if (!$loaner_post || $loaner_post->post_type !== 'loaner' || $loaner_post->post_status !== 'publish') {
+            return [
+                'success' => false,
+                'message' => 'Please select a valid loaner.',
+            ];
         }
 
         $loaned_quantities = gs_get_loaned_quantities_map();
@@ -76,6 +104,11 @@ if (!function_exists('gs_handle_create_loan')) {
             $quantity = isset($row['quantity']) ? (int) $row['quantity'] : 0;
 
             if ($item_id <= 0 || $quantity <= 0) {
+                continue;
+            }
+
+            $item_post = get_post($item_id);
+            if (!$item_post || $item_post->post_type !== 'item' || $item_post->post_status !== 'publish') {
                 continue;
             }
 
@@ -136,6 +169,7 @@ if (!function_exists('gs_handle_create_loan')) {
                 'post_type'   => 'loan_item',
                 'post_status' => 'publish',
                 'post_title'  => get_the_title($item_id) . ' x ' . $quantity,
+                'post_author' => $current_user_id,
             ]);
 
             if (is_wp_error($loan_item_id) || !$loan_item_id) {
@@ -146,9 +180,6 @@ if (!function_exists('gs_handle_create_loan')) {
             update_field('related_loan', $loan_id, $loan_item_id);
             update_field('quantity', $quantity, $loan_item_id);
         }
-
-        wp_redirect( get_permalink($loan_id));
-        exit;
 
         return [
             'success' => true,

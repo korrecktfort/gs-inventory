@@ -1,6 +1,15 @@
 <?php
 $title = trim((string) ($args['title'] ?? '')); 
-$redirect_target = home_url(wp_unslash($_SERVER['REQUEST_URI'] ?? '/'));
+$request_uri = wp_unslash($_SERVER['REQUEST_URI'] ?? '/');
+$request_path = wp_parse_url($request_uri, PHP_URL_PATH);
+$request_query = wp_parse_url($request_uri, PHP_URL_QUERY);
+
+if (!is_string($request_path) || $request_path === '') {
+    $request_path = '/';
+}
+
+$redirect_target = home_url($request_path . (is_string($request_query) && $request_query !== '' ? ('?' . $request_query) : ''));
+$redirect_target = wp_validate_redirect($redirect_target, home_url('/'));
 ?>
 
 <main class="gs-login-mask-page">

@@ -4,6 +4,7 @@ $mode = $args['mode'] ?? 'default';
 $root_class = trim((string) ($args['root_class'] ?? ''));
 $title_tag = $args['title_tag'] ?? 'h2';
 $title_url = $args['title_url'] ?? '';
+$title_modal_trigger = isset($args['title_modal_trigger']) ? (bool) $args['title_modal_trigger'] : false;
 $show_title = isset($args['show_title']) ? (bool) $args['show_title'] : true;
 $show_taxonomies = isset($args['show_taxonomies']) ? (bool) $args['show_taxonomies'] : false;
 $show_data_table = isset($args['show_data_table']) ? (bool) $args['show_data_table'] : false;
@@ -20,7 +21,9 @@ if (!$item_id && !$can_render_placeholder) {
 }
 
 $item_name = $item_id ? get_the_title($item_id) : '';
-$stock_total = $item_id ? (int) get_field('stock_total', $item_id) : 0;
+$availability_text = ($item_id && function_exists('gs_get_item_availability_pill_text'))
+    ? gs_get_item_availability_pill_text($item_id)
+    : '0/0';
 
 $condition_name = '';
 $tag_names = [];
@@ -115,7 +118,7 @@ if ($root_class !== '') {
     $article_class .= ' ' . $root_class;
 }
 
-$stock_label = ($item_id || $mode === 'modal') ? (string) $stock_total : '0';
+$stock_label = ($item_id || $mode === 'modal') ? (string) $availability_text : '0/0';
 $is_modal = ($mode === 'modal');
 $has_condition = ($condition_name !== '');
 $has_tags = !empty($tag_names);
@@ -131,7 +134,9 @@ $render_image_row = $show_image && ($show_data_table || $has_image || $is_modal)
     <header class="item-preview-head">
         <?php if ($show_title) : ?>
             <<?php echo esc_attr($title_tag); ?> class="item-preview-title"<?php echo ($mode === 'modal') ? ' id="item-modal-name"' : ''; ?>>
-                <?php if ($title_url !== '') : ?>
+                <?php if ($title_modal_trigger && $item_id > 0) : ?>
+                    <?php get_template_part('template-parts/items/item-info', 'trigger', ['item_id' => $item_id]); ?>
+                <?php elseif ($title_url !== '') : ?>
                     <a class="gs-arrow-link" href="<?php echo esc_url($title_url); ?>">
                         <?php echo esc_html($item_name); ?>
                     </a>
@@ -143,7 +148,6 @@ $render_image_row = $show_image && ($show_data_table || $has_image || $is_modal)
 
         <?php if ($show_stock_in_header) : ?>
             <p class="item-preview-stock">
-                <span class="ui-label">Stock:</span>
                 <span class="item-preview-stock-value"<?php echo ($mode === 'modal') ? ' id="item-modal-stock"' : ''; ?>>
                     <?php echo esc_html($stock_label); ?>
                 </span>

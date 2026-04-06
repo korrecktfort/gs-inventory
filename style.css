@@ -24,6 +24,7 @@ Description: A minimal theme for inventory management
     --pill-font-size: 0.88rem;
     --pill-bg: color-mix(in srgb, var(--color-surface) 82%, var(--color-border) 18%);
     --pill-min-width: 2.6rem;
+    --gs-sticky-header-offset: 0px;
 }
 
 body {
@@ -172,7 +173,9 @@ h3 {
 
 .item-availability-value {
     margin: 0;
-    min-width: var(--pill-min-width);
+    width: 7ch;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
 }
 
 .item-row.is-selected .item-availability-value {
@@ -204,7 +207,7 @@ h3 {
 
 .item-list-toolbar {
     position: sticky;
-    top: 0;
+    top: var(--gs-sticky-header-offset);
     z-index: 5;
     padding: 0.45rem 0.45rem 0;
     background: var(--color-surface);
@@ -316,15 +319,25 @@ h3 {
 
 .item-preview-head {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 0.55rem;
+    min-width: 0;
 }
 
 .item-preview-title {
     margin: 0;
     font-size: var(--font-size-h2);
     line-height: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.item-preview-title .item-info-trigger {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    min-width: 0;
 }
 
 .item-preview-title a {
@@ -358,7 +371,8 @@ h3 {
     flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    justify-content: flex-end;
+    align-self: center;
 }
 
 .item-preview-stock .ui-label {
@@ -368,8 +382,9 @@ h3 {
 }
 
 .item-preview-stock-value {
-    min-width: var(--pill-min-width);
+    width: 7ch;
     text-align: center;
+    font-variant-numeric: tabular-nums;
 }
 
 .item-preview-data {
@@ -583,6 +598,7 @@ h3 {
         --font-size-h2: 1.35rem;
         --font-size-h3: 1.15rem;
         --pill-font-size: 0.82rem;
+        --gs-sticky-header-offset: 3rem;
     }
 
     /* UI primitives */
@@ -597,13 +613,15 @@ h3 {
 
     /* Navigation */
     .gs-site-header {
-        padding: 0.75rem 1rem;
+        padding: 0.45rem 0.7rem;
     }
 
     .gs-menu-toggle {
         display: inline-flex;
         align-items: center;
         gap: 0.3rem;
+        padding: 0.22rem 0.42rem;
+        line-height: 1;
         min-width: 0;
         min-height: 0;
     }
@@ -658,6 +676,21 @@ h3 {
     .item-list-toolbar-section.item-list-toolbar-tags {
         min-width: 0;
         flex: 1 1 100%;
+    }
+
+    .item-list-toolbar-row.item-list-toolbar-search-row {
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+
+    .item-list-toolbar-row.item-list-toolbar-search-row .item-list-toolbar-section.item-list-toolbar-search {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .item-list-toolbar-row.item-list-toolbar-search-row .item-list-toolbar-section.item-list-toolbar-tags {
+        flex: 0 1 10.5rem;
+        min-width: 8.25rem;
     }
 
     /* Item rows */
@@ -846,13 +879,25 @@ h3 {
 
 .item-modal-style {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    margin: 0;
+    padding: 0;
     z-index: 1200;
+    pointer-events: auto;
+    touch-action: none;
 }
 
 .item-modal-backdrop {
-    position: absolute;
-    inset: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
     background: rgba(0, 0, 0, 0.28);
 }
 
@@ -865,6 +910,13 @@ h3 {
     color: var(--color-text);
     padding: 0.75rem 0.85rem;
     box-sizing: border-box;
+    touch-action: auto;
+}
+
+body.item-modal-open {
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: none;
 }
 
 .item-modal-dialog.item-single-dialog {
@@ -1367,7 +1419,7 @@ input.ui-input[required]:valid,
 
 .loan-list-toolbar {
     position: sticky;
-    top: 0;
+    top: var(--gs-sticky-header-offset);
     z-index: 5;
     padding: 0.45rem 0.45rem 0;
     background: var(--color-surface);
@@ -1436,7 +1488,7 @@ input.ui-input[required]:valid,
 
 .loaner-overview-toolbar {
     position: sticky;
-    top: 0;
+    top: var(--gs-sticky-header-offset);
     z-index: 5;
     padding: 0.45rem 0.45rem 0;
     background: var(--color-surface);
