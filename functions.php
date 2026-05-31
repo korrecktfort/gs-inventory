@@ -41,6 +41,43 @@ function gs_get_item_availability_pill_text( int $item_id ): string {
 	return sprintf( '%d/%d', $available, $stock_total );
 }
 
+function gs_get_item_modal_dialog_html( int $item_id ): string {
+	ob_start();
+	get_template_part( 'template-parts/items/item-info', 'modal-dialog', array( 'item_id' => $item_id ) );
+	return (string) ob_get_clean();
+}
+
+function gs_ajax_get_item_modal_html(): void {
+	$nonce = isset( $_POST['nonce'] )
+		? sanitize_text_field( wp_unslash( (string) $_POST['nonce'] ) )
+		: '';
+
+	if ( ! wp_verify_nonce( $nonce, 'gs_item_modal_html' ) ) {
+		wp_send_json_error( array( 'message' => 'Invalid request.' ), 403 );
+	}
+
+	$item_id = isset( $_POST['item_id'] )
+		? (int) $_POST['item_id']
+		: 0;
+
+	if ( $item_id <= 0 ) {
+		wp_send_json_error( array( 'message' => 'Missing item id.' ), 400 );
+	}
+
+	$item = get_post( $item_id );
+	if ( ! $item || 'item' !== $item->post_type || 'publish' !== $item->post_status ) {
+		wp_send_json_error( array( 'message' => 'Item not found.' ), 404 );
+	}
+
+	wp_send_json_success(
+		array(
+			'html' => gs_get_item_modal_dialog_html( $item_id ),
+		)
+	);
+}
+add_action( 'wp_ajax_gs_get_item_modal_html', 'gs_ajax_get_item_modal_html' );
+add_action( 'wp_ajax_nopriv_gs_get_item_modal_html', 'gs_ajax_get_item_modal_html' );
+
 function enqueue_style() {
 	$style_version = gs_asset_version( 'style.css' );
 
@@ -76,6 +113,15 @@ function enqueue_style() {
 	foreach ( $scripts as $handle => $path ) {
 		wp_enqueue_script( $handle, get_template_directory_uri() . '/' . $path, array(), gs_asset_version( $path ), true );
 	}
+
+	wp_localize_script(
+		'gs-item-modal',
+		'gsItemModalConfig',
+		array(
+			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+			'nonce'   => wp_create_nonce( 'gs_item_modal_html' ),
+		)
+	);
 }
 add_action( 'wp_enqueue_scripts', 'enqueue_style' );
 
