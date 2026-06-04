@@ -612,3 +612,378 @@ function gs_maybe_flush_rewrites_once() {
 	update_option( 'gs_inventory_rewrites_flushed', '1', false );
 }
 add_action( 'admin_init', 'gs_maybe_flush_rewrites_once' );
+
+function gs_theme_setup_page_slug(): string {
+	return 'gs-theme-setup';
+}
+
+function gs_theme_setup_required_pages(): array {
+	return array(
+		'create-loan' => array(
+			'title'    => 'Create Loan',
+			'template' => 'page-create-loan.php',
+		),
+		'item-overview' => array(
+			'title'    => 'Item Overview',
+			'template' => 'page-item-overview.php',
+		),
+		'loan-overview' => array(
+			'title'    => 'Loan Overview',
+			'template' => 'page-loan-overview.php',
+		),
+		'loaner-overview' => array(
+			'title'    => 'Loaner Overview',
+			'template' => 'page-loaner-overview.php',
+		),
+	);
+}
+
+function gs_theme_setup_find_page_by_slug( string $slug ): ?WP_Post {
+	$pages = get_posts(
+		array(
+			'post_type'      => 'page',
+			'name'           => $slug,
+			'post_status'    => array( 'publish', 'draft', 'private', 'pending', 'future' ),
+			'posts_per_page' => 1,
+		)
+	);
+
+	if ( empty( $pages ) || ! $pages[0] instanceof WP_Post ) {
+		return null;
+	}
+
+	return $pages[0];
+}
+
+function gs_theme_setup_ensure_page( string $slug, array $config, array &$report ): int {
+	$title    = (string) ( $config['title'] ?? $slug );
+	$template = (string) ( $config['template'] ?? '' );
+	$page     = gs_theme_setup_find_page_by_slug( $slug );
+
+	if ( $page ) {
+		$page_id = (int) $page->ID;
+		$report[] = sprintf( 'Page found: %s (%d)', $title, $page_id );
+	} else {
+		$page_id = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => $title,
+				'post_name'   => $slug,
+			)
+		);
+
+		if ( is_wp_error( $page_id ) || $page_id <= 0 ) {
+			$report[] = sprintf( 'Page create failed: %s', $title );
+			return 0;
+		}
+
+		$report[] = sprintf( 'Page created: %s (%d)', $title, $page_id );
+	}
+
+	if ( $template !== '' ) {
+		update_post_meta( $page_id, '_wp_page_template', $template );
+		$report[] = sprintf( 'Template set: %s -> %s', $title, $template );
+	}
+
+	return (int) $page_id;
+}
+
+function gs_theme_setup_ensure_main_menu( array $page_ids, array &$report ): int {
+	$menu_name = 'Main Menu';
+	$menu_obj  = wp_get_nav_menu_object( $menu_name );
+	$menu_id   = $menu_obj ? (int) $menu_obj->term_id : 0;
+
+	if ( $menu_id <= 0 ) {
+		$menu_id = (int) wp_create_nav_menu( $menu_name );
+		$report[] = sprintf( 'Menu created: %s (%d)', $menu_name, $menu_id );
+	} else {
+		$report[] = sprintf( 'Menu found: %s (%d)', $menu_name, $menu_id );
+	}
+
+	if ( $menu_id <= 0 ) {
+		$report[] = 'Menu setup failed: could not create or load main menu.';
+		return 0;
+	}
+
+	$menu_items = wp_get_nav_menu_items( $menu_id, array( 'post_status' => 'any' ) );
+	$menu_items = is_array( $menu_items ) ? $menu_items : array();
+
+	$by_object_id = array();
+	foreach ( $menu_items as $menu_item ) {
+		$object_id = (int) ( $menu_item->object_id ?? 0 );
+		if ( $object_id > 0 ) {
+			$by_object_id[ $object_id ] = (int) $menu_item->ID;
+		}
+	}
+
+	$position = 1;
+	foreach ( $page_ids as $page_id ) {
+		$page_id = (int) $page_id;
+		if ( $page_id <= 0 ) {
+			continue;
+		}
+
+		$item_id = (int) ( $by_object_id[ $page_id ] ?? 0 );
+		$args    = array(
+			'menu-item-object-id' => $page_id,
+			'menu-item-object'    => 'page',
+			'menu-item-type'      => 'post_type',
+			'menu-item-status'    => 'publish',
+			'menu-item-position'  => $position,
+		);
+
+		if ( $item_id > 0 ) {
+			wp_update_nav_menu_item( $menu_id, $item_id, $args );
+			$report[] = sprintf( 'Menu item updated: page %d position %d', $page_id, $position );
+		} else {
+			wp_update_nav_menu_item( $menu_id, 0, $args );
+			$report[] = sprintf( 'Menu item added: page %d position %d', $page_id, $position );
+		}
+
+		$position++;
+	}
+
+	$locations = get_theme_mod( 'nav_menu_locations', array() );
+	if ( is_array( $locations ) && array_key_exists( 'main-menu', $locations ) ) {
+		$locations['main-menu'] = $menu_id;
+		set_theme_mod( 'nav_menu_locations', $locations );
+		$report[] = 'Menu location assigned: main-menu.';
+	} else {
+		$report[] = 'Menu location skipped: main-menu location not available.';
+	}
+
+	return $menu_id;
+}
+
+function gs_theme_setup_ensure_item_conditions( array &$report ): void {
+	$terms = array(
+		'broken' => 'broken',
+		'new'    => 'new',
+		'worn'   => 'worn',
+	);
+
+	foreach ( $terms as $slug => $name ) {
+		$existing = term_exists( $slug, 'item_condition' );
+		if ( $existing ) {
+			$report[] = sprintf( 'Term found: %s', $name );
+			continue;
+		}
+
+		$result = wp_insert_term(
+			$name,
+			'item_condition',
+			array(
+				'slug' => $slug,
+			)
+		);
+
+		if ( is_wp_error( $result ) ) {
+			$report[] = sprintf( 'Term create failed: %s', $name );
+			continue;
+		}
+
+		$report[] = sprintf( 'Term created: %s', $name );
+	}
+}
+
+function gs_theme_setup_apply_site_settings( int $front_page_id, array &$report ): void {
+	update_option( 'permalink_structure', '/%postname%/' );
+	$report[] = 'Permalink structure set: /%postname%/';
+
+	if ( $front_page_id > 0 ) {
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $front_page_id );
+		$report[] = sprintf( 'Reading settings set: static front page (%d).', $front_page_id );
+	} else {
+		$report[] = 'Reading settings skipped: front page not available.';
+	}
+
+	flush_rewrite_rules( false );
+	$report[] = 'Rewrite rules flushed.';
+}
+
+function gs_run_theme_initializer(): array {
+	$report         = array();
+	$page_configs   = gs_theme_setup_required_pages();
+	$ordered_page_ids = array();
+
+	foreach ( $page_configs as $slug => $config ) {
+		$page_id = gs_theme_setup_ensure_page( $slug, $config, $report );
+		if ( $page_id > 0 ) {
+			$ordered_page_ids[ $slug ] = $page_id;
+		}
+	}
+
+	gs_theme_setup_ensure_main_menu( array_values( $ordered_page_ids ), $report );
+	gs_theme_setup_ensure_item_conditions( $report );
+
+	$front_page_id = (int) ( $ordered_page_ids['create-loan'] ?? 0 );
+	gs_theme_setup_apply_site_settings( $front_page_id, $report );
+
+	return $report;
+}
+
+function gs_register_theme_setup_admin_page(): void {
+	add_theme_page(
+		'Theme Setup',
+		'Theme Setup',
+		'edit_theme_options',
+		gs_theme_setup_page_slug(),
+		'gs_render_theme_setup_admin_page'
+	);
+}
+add_action( 'admin_menu', 'gs_register_theme_setup_admin_page' );
+
+function gs_enqueue_theme_setup_assets( string $hook_suffix ): void {
+	if ( 'appearance_page_' . gs_theme_setup_page_slug() !== $hook_suffix ) {
+		return;
+	}
+
+	add_thickbox();
+}
+add_action( 'admin_enqueue_scripts', 'gs_enqueue_theme_setup_assets' );
+
+function gs_get_theme_setup_report_transient_key( int $user_id ): string {
+	return 'gs_theme_setup_report_' . $user_id;
+}
+
+function gs_theme_setup_plugin_shortcuts(): array {
+	$plugins = array(
+		array(
+			'slug'  => 'advanced-custom-fields',
+			'label' => 'Advanced Custom Fields',
+			'description' => 'Provides the custom fields framework used across this website for structured content like items, loans, and loaners.',
+		),
+		array(
+			'slug'  => 'deployer-for-git',
+			'label' => 'Deployer for Git',
+			'description' => 'Use the following info for the "Install Theme Setup" inside the plugin to subscribe to theme updates.',
+			'details' => array(
+				'Provider Type'  => 'GitHub',
+				'Repository URL' => 'https://github.com/korrecktfort/gs-inventory',
+				'Branch'         => 'main',
+			),
+		),
+	);
+
+	return apply_filters( 'gs_theme_setup_plugin_shortcuts', $plugins );
+}
+
+function gs_render_theme_setup_admin_page(): void {
+	if ( ! current_user_can( 'edit_theme_options' ) ) {
+		wp_die( 'You are not allowed to access this page.' );
+	}
+
+	$user_id = get_current_user_id();
+	$report  = get_transient( gs_get_theme_setup_report_transient_key( $user_id ) );
+	$report  = is_array( $report ) ? $report : array();
+
+	if ( isset( $_GET['gs_setup_done'] ) ) {
+		delete_transient( gs_get_theme_setup_report_transient_key( $user_id ) );
+	}
+	?>
+	<div class="wrap">
+		<h1>Theme Setup</h1>
+		<p>Run one-click initialization for required pages, menu, taxonomy terms, permalinks, and reading settings.</p>
+
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+			<input type="hidden" name="action" value="gs_run_theme_setup">
+			<?php wp_nonce_field( 'gs_run_theme_setup', 'gs_theme_setup_nonce' ); ?>
+			<?php submit_button( 'Run Theme Initialization', 'primary', 'submit', false ); ?>
+		</form>
+
+		<?php $plugin_shortcuts = gs_theme_setup_plugin_shortcuts(); ?>
+		<?php if ( ! empty( $plugin_shortcuts ) ) : ?>
+			<h2>Plugin Shortcuts</h2>
+			<p>The following plugins are needed for the functionality of this website.</p>
+			<p>Use the buttons below to open each plugin page directly in wp-admin.</p>
+			<div style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));max-width:1100px;">
+				<?php foreach ( $plugin_shortcuts as $plugin ) : ?>
+					<?php
+					$plugin_slug = sanitize_key( (string) ( $plugin['slug'] ?? '' ) );
+					$plugin_label = trim( (string) ( $plugin['label'] ?? $plugin_slug ) );
+					$plugin_description = trim( (string) ( $plugin['description'] ?? '' ) );
+					$plugin_details = is_array( $plugin['details'] ?? null ) ? $plugin['details'] : array();
+
+					if ( '' === $plugin_slug || '' === $plugin_label ) {
+						continue;
+					}
+
+					$plugin_url = add_query_arg(
+						array(
+							'tab'    => 'plugin-information',
+							'plugin' => $plugin_slug,
+							'TB_iframe' => 'true',
+							'width' => '600',
+							'height' => '550',
+						),
+						admin_url( 'plugin-install.php' )
+					);
+					?>
+					<div class="postbox" style="padding:12px;">
+						<h3 style="margin:0 0 10px 0;"><?php echo esc_html( $plugin_label ); ?></h3>
+						<a class="button button-secondary thickbox" href="<?php echo esc_url( $plugin_url ); ?>">Open Plugin Page</a>
+
+						<p style="margin:10px 0 10px 0;"><?php echo esc_html( $plugin_description ); ?></p>
+
+						<?php if ( ! empty( $plugin_details ) ) : ?>
+							<ul style="margin:0 0 0 18px;">
+								<?php foreach ( $plugin_details as $detail_key => $detail_value ) : ?>
+									<?php
+									$detail_label = trim( (string) $detail_key );
+									$detail_text = trim( (string) $detail_value );
+
+									if ( '' === $detail_label || '' === $detail_text ) {
+										continue;
+									}
+									?>
+									<li><strong><?php echo esc_html( $detail_label ); ?>:</strong> <?php echo esc_html( $detail_text ); ?></li>
+								<?php endforeach; ?>
+							</ul>
+						<?php endif; ?>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		<?php endif; ?>
+
+		<?php if ( ! empty( $report ) ) : ?>
+			<h2>Last Run Report</h2>
+			<ul>
+				<?php foreach ( $report as $line ) : ?>
+					<li><?php echo esc_html( (string) $line ); ?></li>
+				<?php endforeach; ?>
+			</ul>
+		<?php endif; ?>
+	</div>
+	<?php
+}
+
+function gs_handle_theme_setup_post_action(): void {
+	if ( ! current_user_can( 'edit_theme_options' ) ) {
+		wp_die( 'You are not allowed to run theme setup.' );
+	}
+
+	$nonce = isset( $_POST['gs_theme_setup_nonce'] )
+		? sanitize_text_field( wp_unslash( (string) $_POST['gs_theme_setup_nonce'] ) )
+		: '';
+
+	if ( ! wp_verify_nonce( $nonce, 'gs_run_theme_setup' ) ) {
+		wp_die( 'Invalid setup request.' );
+	}
+
+	$report = gs_run_theme_initializer();
+	set_transient( gs_get_theme_setup_report_transient_key( get_current_user_id() ), $report, MINUTE_IN_SECONDS * 30 );
+
+	wp_safe_redirect(
+		add_query_arg(
+			array(
+				'page'          => gs_theme_setup_page_slug(),
+				'gs_setup_done' => '1',
+			),
+			admin_url( 'themes.php' )
+		)
+	);
+	exit;
+}
+add_action( 'admin_post_gs_run_theme_setup', 'gs_handle_theme_setup_post_action' );
