@@ -82,6 +82,69 @@ $submit_button_id = 'return-loan-submit-' . $loan_id;
 $items_toggle_id = 'loan-items-toggle-' . $loan_id;
 $items_content_id = 'loan-items-content-' . $loan_id;
 $article_class = trim('loan-single-card ' . $root_class);
+
+$loan_meta_rows = array();
+
+if ($loaner) {
+    $loaner_title = is_object($loaner) ? get_the_title((int) ($loaner->ID ?? 0)) : get_the_title($loaner);
+    $loaner_value = !empty($loaner_url)
+        ? sprintf('<a href="%s">%s</a>', esc_url($loaner_url), esc_html((string) $loaner_title))
+        : sprintf('<span>%s</span>', esc_html((string) $loaner_title));
+
+    $loan_meta_rows[] = array(
+        'key'        => 'loaner',
+        'label'      => 'Loaner',
+        'value'      => $loaner_value,
+        'allow_html' => true,
+    );
+}
+
+if ($loan_user_name !== '') {
+    $loan_user_value = $loan_user_name;
+    if ($loan_user_email !== '') {
+        $loan_user_value .= ' (' . $loan_user_email . ')';
+    }
+
+    $loan_meta_rows[] = array(
+        'key'   => 'created_by',
+        'label' => 'Created By',
+        'value' => $loan_user_value,
+    );
+}
+
+$loan_meta_rows[] = array(
+    'key'   => 'start_date',
+    'label' => 'Start Date',
+    'value' => $start_date_display,
+);
+
+$loan_meta_rows[] = array(
+    'key'   => 'return_date',
+    'label' => 'Return Date',
+    'value' => $due_date_display,
+);
+
+$loan_meta_rows = apply_filters('gs_loan_single_meta_rows', $loan_meta_rows, $loan_id, $args ?? array());
+
+$loan_meta_rows = array_values(array_filter(array_map(static function ($row) {
+    if (!is_array($row)) {
+        return null;
+    }
+
+    $label = trim((string) ($row['label'] ?? ''));
+    $value = (string) ($row['value'] ?? '');
+
+    if ($label === '' || $value === '') {
+        return null;
+    }
+
+    return array(
+        'key'        => (string) ($row['key'] ?? ''),
+        'label'      => $label,
+        'value'      => $value,
+        'allow_html' => !empty($row['allow_html']),
+    );
+}, (array) $loan_meta_rows)));
 ?>
 
 <article
@@ -109,40 +172,21 @@ $article_class = trim('loan-single-card ' . $root_class);
     </div>
 
     <div class="loan-single-meta">
-    <?php if ($loaner) : ?>
-    <div class="loan-single-meta-item">
-        <span class="ui-label">Loaner</span>
-        <?php if (!empty($loaner_url)) : ?>
-            <a href="<?php echo esc_url($loaner_url); ?>"><?php echo esc_html(get_the_title($loaner_id)); ?></a>
-        <?php else : ?>
-            <span><?php echo esc_html(get_the_title($loaner)); ?></span>
-        <?php endif; ?>
-    </div>
-    <?php endif; ?>
-
-    <?php if ($loan_user_name !== '') : ?>
-    <div class="loan-single-meta-item">
-        <span class="ui-label">Created By</span>
+    <?php foreach ($loan_meta_rows as $meta_row) : ?>
+    <div class="loan-single-meta-item"<?php echo !empty($meta_row['key']) ? ' data-loan-meta-key="' . esc_attr($meta_row['key']) . '"' : ''; ?>>
+        <span class="ui-label"><?php echo esc_html($meta_row['label']); ?></span>
         <span>
-            <?php echo esc_html($loan_user_name); ?>
-            <?php if ($loan_user_email !== '') : ?>
-                <?php echo esc_html(' (' . $loan_user_email . ')'); ?>
+            <?php if (!empty($meta_row['allow_html'])) : ?>
+                <?php echo wp_kses_post($meta_row['value']); ?>
+            <?php else : ?>
+                <?php echo esc_html($meta_row['value']); ?>
             <?php endif; ?>
         </span>
     </div>
-    <?php endif; ?>
-
-    <div class="loan-single-meta-item">
-        <span class="ui-label">Start Date</span>
-        <span><?php echo esc_html($start_date_display); ?></span>
-    </div>
-
-    <div class="loan-single-meta-item">
-        <span class="ui-label">Return Date</span>
-        <span><?php echo esc_html($due_date_display); ?></span>
-    </div>
+    <?php endforeach; ?>
 
     </div>
+    <?php do_action('gs_loan_single_after_meta', $loan_id, $args ?? array(), $loan_meta_rows); ?>
 
     <section class="loan-single-items">
     <button

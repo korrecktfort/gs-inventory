@@ -29,11 +29,40 @@ if ( ! $item_id && ! $is_modal ) {
 	return;
 }
 
-// Canonical view model used by the markup section below.
+// Tiny helpers keep ACF-to-view-model mapping compact.
+$map_term_field = static function ( $field_name, $taxonomy, $post_id ) {
+	$terms = array();
+	foreach ( (array) get_field( $field_name, $post_id ) as $term_id ) {
+		$term = get_term( (int) $term_id, $taxonomy );
+		if ( ! $term || is_wp_error( $term ) ) {
+			continue;
+		}
+
+		$terms[ $term->term_id ] = array(
+			'id'   => (int) $term->term_id,
+			'name' => (string) $term->name,
+		);
+	}
+
+	return array_values( $terms );
+};
+
+$extract_term_names = static function ( $terms ) {
+	$names = array();
+	foreach ( (array) $terms as $term ) {
+		$name = trim( (string) ( $term['name'] ?? '' ) );
+		if ( $name !== '' ) {
+			$names[] = $name;
+		}
+	}
+
+	return $names;
+};
+
 $preview_data = array(
 	'item_id'           => $item_id,
-	'name'              => $item_id > 0 ? (string) get_the_title( $item_id ) : '',
-	'stock'             => ( $item_id > 0 && function_exists( 'gs_get_item_availability_pill_text' ) ) ? gs_get_item_availability_pill_text( $item_id ) : '0/0',
+	'name'              => '',
+	'stock'             => '0/0',
 	'condition'         => array(
 		'id'   => 0,
 		'name' => '',
@@ -50,39 +79,25 @@ $preview_data = array(
 );
 
 if ( $item_id > 0 ) {
-	// ACF field mapping: read field values and map them into preview_data.
+	$preview_data['name'] = (string) get_the_title( $item_id );
+
+	if ( function_exists( 'gs_get_item_availability_pill_text' ) ) {
+		$preview_data['stock'] = (string) gs_get_item_availability_pill_text( $item_id );
+	}
+
 	$image_field = (array) get_field( 'image', $item_id );
 	$image_id    = (int) ( $image_field['ID'] ?? $image_field['id'] ?? 0 );
-	$image_url   = isset( $image_field['url'] ) ? (string) $image_field['url'] : '';
-	$image_alt   = isset( $image_field['alt'] ) ? trim( (string) $image_field['alt'] ) : '';
 
-	if ( $image_url !== '' ) {
-		$preview_data['image']['url'] = $image_url;
-	}
-
-	if ( $image_alt !== '' ) {
-		$preview_data['image']['alt'] = $image_alt;
-	}
+	$preview_data['image']['url'] = (string) ( $image_field['url'] ?? '' );
+	$preview_data['image']['alt'] = trim( (string) ( $image_field['alt'] ?? '' ) );
 
 	if ( $image_id > 0 ) {
-		$resolved_image_url = (string) wp_get_attachment_image_url( $image_id, 'gs-item-detail' );
-		if ( $resolved_image_url === '' ) {
-			$resolved_image_url = (string) wp_get_attachment_image_url( $image_id, 'large' );
-		}
-
-		$preview_data['image']['url']    = $resolved_image_url;
+		$preview_data['image']['url'] = (string) ( wp_get_attachment_image_url( $image_id, 'gs-item-detail' ) ?: wp_get_attachment_image_url( $image_id, 'large' ) );
 		$preview_data['image']['srcset'] = (string) wp_get_attachment_image_srcset( $image_id, 'gs-item-detail' );
 
-		if ( $preview_data['image']['alt'] === '' ) {
-			$image_alt_meta = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
-			if ( is_string( $image_alt_meta ) ) {
-				$preview_data['image']['alt'] = trim( $image_alt_meta );
-			}
+		if ( '' === $preview_data['image']['alt'] ) {
+			$preview_data['image']['alt'] = trim( (string) get_post_meta( $image_id, '_wp_attachment_image_alt', true ) );
 		}
-	}
-
-	if ( $preview_data['image']['alt'] === '' ) {
-		$preview_data['image']['alt'] = $preview_data['name'] !== '' ? $preview_data['name'] : 'Item image';
 	}
 
 	$condition_id = (int) get_field( 'condition', $item_id );
@@ -96,83 +111,25 @@ if ( $item_id > 0 ) {
 		}
 	}
 
-	$tag_ids = array();
-	foreach ( (array) get_field( 'tags', $item_id ) as $tag_id ) {
-		$tag_id = (int) $tag_id;
-		if ( $tag_id > 0 ) {
-			$tag_ids[] = $tag_id;
-		}
-	}
-
-	foreach ( $tag_ids as $tag_id ) {
-		$tag_term = get_term( $tag_id, 'item_tag' );
-		if ( ! $tag_term || is_wp_error( $tag_term ) ) {
-			continue;
-		}
-
-		$preview_data['tags'][ $tag_term->term_id ] = array(
-			'id'   => (int) $tag_term->term_id,
-			'name' => (string) $tag_term->name,
-		);
-	}
-
-	$storage_ids = array();
-	foreach ( (array) get_field( 'storage_location', $item_id ) as $storage_id ) {
-		$storage_id = (int) $storage_id;
-		if ( $storage_id > 0 ) {
-			$storage_ids[] = $storage_id;
-		}
-	}
-
-	foreach ( $storage_ids as $storage_id ) {
-		$storage_term = get_term( $storage_id, 'storage_locations' );
-		if ( ! $storage_term || is_wp_error( $storage_term ) ) {
-			continue;
-		}
-
-		$preview_data['storage_locations'][ $storage_term->term_id ] = array(
-			'id'   => (int) $storage_term->term_id,
-			'name' => (string) $storage_term->name,
-		);
-	}
-
-	$preview_data['tags'] = array_values( $preview_data['tags'] );
-	$preview_data['storage_locations'] = array_values( $preview_data['storage_locations'] );
-}
-
-if ( ! empty( $preview_data['storage_locations'] ) ) {
-	$storage_location_names = array();
-	foreach ( $preview_data['storage_locations'] as $storage_term ) {
-		$storage_name = isset( $storage_term['name'] ) ? trim( (string) $storage_term['name'] ) : '';
-		if ( $storage_name === '' ) {
-			continue;
-		}
-
-		$storage_location_names[] = $storage_name;
-	}
-
-	$preview_data['storage_location'] = implode(
-		', ',
-		$storage_location_names
-	);
+	$preview_data['tags']              = $map_term_field( 'tags', 'item_tag', $item_id );
+	$preview_data['storage_locations'] = $map_term_field( 'storage_location', 'storage_locations', $item_id );
 }
 
 $preview_data = apply_filters( 'gs_item_preview_data', $preview_data, $item_id );
 
-// Render variables: keep template output simple and detached from raw ACF calls.
 $item_name = (string) ( $preview_data['name'] ?? '' );
 $condition_name = (string) ( $preview_data['condition']['name'] ?? '' );
 $tag_terms = is_array( $preview_data['tags'] ?? null ) ? $preview_data['tags'] : array();
-$tag_names = array();
-foreach ( $tag_terms as $tag ) {
-	$tag_name = isset( $tag['name'] ) ? trim( (string) $tag['name'] ) : '';
-	if ( $tag_name !== '' ) {
-		$tag_names[] = $tag_name;
-	}
+$tag_names = $extract_term_names( $tag_terms );
+$storage_terms = is_array( $preview_data['storage_locations'] ?? null ) ? $preview_data['storage_locations'] : array();
+$storage_location = trim( (string) ( $preview_data['storage_location'] ?? '' ) );
+
+if ( '' === $storage_location ) {
+	$storage_location = implode( ', ', $extract_term_names( $storage_terms ) );
 }
-$storage_location = (string) ( $preview_data['storage_location'] ?? '' );
+
 $image_url = (string) ( $preview_data['image']['url'] ?? '' );
-$image_alt = (string) ( $preview_data['image']['alt'] ?? '' );
+$image_alt = trim( (string) ( $preview_data['image']['alt'] ?? '' ) );
 $image_srcset = (string) ( $preview_data['image']['srcset'] ?? '' );
 $image_sizes = (string) ( $preview_data['image']['sizes'] ?? '(max-width: 768px) 100vw, 24rem' );
 
@@ -180,20 +137,12 @@ if ( '' === $image_alt ) {
 	$image_alt = $item_name !== '' ? $item_name : 'Item image';
 }
 
-$storage_terms = is_array( $preview_data['storage_locations'] ?? null ) ? $preview_data['storage_locations'] : array();
-if ( '' === $storage_location && ! empty( $storage_terms ) ) {
-	$storage_names = array();
-	foreach ( $storage_terms as $storage_term ) {
-		$storage_name = isset( $storage_term['name'] ) ? trim( (string) $storage_term['name'] ) : '';
-		if ( $storage_name !== '' ) {
-			$storage_names[] = $storage_name;
-		}
-	}
-
-	$storage_location = implode(
-		', ',
-		$storage_names
-	);
+$has_taxonomy_data = ( '' !== $condition_name || ! empty( $tag_names ) || '' !== $storage_location );
+$condition_display = ( $is_modal && '' === $condition_name ) ? '-' : $condition_name;
+$storage_display = ( $is_modal && '' === $storage_location ) ? '-' : $storage_location;
+$tag_display_names = $tag_names;
+if ( $is_modal && empty( $tag_display_names ) ) {
+	$tag_display_names = array( '-' );
 }
 
 $article_class = 'item-preview';
@@ -233,7 +182,7 @@ $has_image = ( $show_image && '' !== $image_url );
 		<?php endif; ?>
 	</header>
 
-	<?php if ( $show_data_table || ( $show_taxonomies && ( '' !== $condition_name || ! empty( $tag_names ) || '' !== $storage_location ) ) || ( $show_image && $has_image ) ) : ?>
+	<?php if ( $show_data_table || ( $show_taxonomies && ( $has_taxonomy_data || $is_modal ) ) || ( $show_image && ( $has_image || $is_modal ) ) ) : ?>
 		<div class="item-preview-data">
 			<?php if ( $show_data_table ) : ?>
 				<div class="item-preview-data-row">
@@ -248,14 +197,13 @@ $has_image = ( $show_image && '' !== $image_url );
 				<div
 					class="item-preview-data-row"
 					<?php echo $is_modal ? 'data-item-field-row="condition"' : ''; ?>
-					<?php echo ( $is_modal && '' === $condition_name ) ? 'hidden' : ''; ?>
 				>
 					<span class="item-preview-data-key">Condition:</span>
 					<span
 						class="item-preview-tag item-preview-condition-pill"
 						<?php echo $is_modal ? 'id="item-modal-condition" data-item-field="condition"' : ''; ?>
 					>
-						<?php echo esc_html( $condition_name ); ?>
+						<?php echo esc_html( $condition_display ); ?>
 					</span>
 				</div>
 			<?php endif; ?>
@@ -264,14 +212,13 @@ $has_image = ( $show_image && '' !== $image_url );
 				<div
 					class="item-preview-data-row"
 					<?php echo $is_modal ? 'data-item-field-row="storage_location"' : ''; ?>
-					<?php echo ( $is_modal && '' === $storage_location ) ? 'hidden' : ''; ?>
 				>
 					<span class="item-preview-data-key">Storage location:</span>
 					<span
 						class="item-preview-tag item-preview-storage-pill"
 						<?php echo $is_modal ? 'id="item-modal-storage-location" data-item-field="storage_location"' : ''; ?>
 					>
-						<?php echo esc_html( $storage_location ); ?>
+						<?php echo esc_html( $storage_display ); ?>
 					</span>
 				</div>
 			<?php endif; ?>
@@ -280,7 +227,6 @@ $has_image = ( $show_image && '' !== $image_url );
 				<div
 					class="item-preview-data-row"
 					<?php echo $is_modal ? 'data-item-field-row="tags"' : ''; ?>
-					<?php echo ( $is_modal && empty( $tag_names ) ) ? 'hidden' : ''; ?>
 				>
 					<span class="item-preview-data-key">Tags:</span>
 					<div
@@ -288,7 +234,7 @@ $has_image = ( $show_image && '' !== $image_url );
 						aria-label="Item tags"
 						<?php echo $is_modal ? 'id="item-modal-tags" data-item-field="tags"' : ''; ?>
 					>
-						<?php foreach ( $tag_names as $tag_name ) : ?>
+						<?php foreach ( $tag_display_names as $tag_name ) : ?>
 							<span class="item-preview-tag"><?php echo esc_html( $tag_name ); ?></span>
 						<?php endforeach; ?>
 					</div>
