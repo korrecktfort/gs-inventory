@@ -854,6 +854,9 @@ function gs_theme_setup_plugin_shortcuts(): array {
 			'slug'  => 'advanced-custom-fields',
 			'label' => 'Advanced Custom Fields',
 			'description' => 'Provides the custom fields framework used across this website for structured content like items, loans, and loaners.',
+			'details' => array(
+				'Path To ACF JSON File' => '{theme}/assets/acf-exports/{latest}.json'		
+			),
 		),
 		array(
 			'slug'  => 'deployer-for-git',
